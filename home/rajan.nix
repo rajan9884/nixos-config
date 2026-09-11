@@ -551,6 +551,11 @@ in
   programs.git = {
     enable = true;
     settings = {
+      # gh auth login stores its token in ~/.config/gh/hosts.yml, but git
+      # can't use it until a credential helper feeds it. `store` keeps a
+      # ~/.git-credentials file (created once below); HM manages this
+      # config file, so `gh auth setup-git` can never write it itself.
+      credential.helper = "store";
       user = {
         name = "rj9884";
         email = "rj.vidyagyan@gmail.com";
