@@ -9,6 +9,7 @@
 
   # ── Boot ──────────────────────────────────────
   boot.loader.systemd-boot.enable = true;
+  boot.loader.systemd-boot.configurationLimit = 10;
   boot.loader.efi.canTouchEfiVariables = true;
   boot.kernelPackages = pkgs.linuxPackages_latest;
   boot.kernelModules = [ "i915" ];
@@ -71,8 +72,27 @@
   };
   programs.zsh.enable = true;
 
-  # Run unpatched dynamic binaries (VS Code / language servers / npm tools)
+  # dconf dbus service: required for home-manager `dconf.settings`
+  # (portal GTK settings such as the icon theme) to take effect.
+  programs.dconf.enable = true;
+
+  # Run unpatched dynamic binaries (VS Code / language servers / npm tools,
+  # manual ~/.kilo/bin/kilo ELF, mise/node toolchains, opencode plugins).
+  # Libraries mirror the previously-working /etc/nixos setup so kilo keeps
+  # running after switching to this flake.
   programs.nix-ld.enable = true;
+  programs.nix-ld.libraries = with pkgs; [
+    stdenv.cc.cc
+    zlib
+    glibc
+    openssl
+    curl
+    util-linux
+  ];
+
+  # Preserve the previously-enabled Cloudflare WARP service from the minimal
+  # /etc/nixos install so switching to this flake is not a regression.
+  services.cloudflare-warp.enable = true;
 
   # ── Unfree + fonts ────────────────────────────
   nixpkgs.config.allowUnfree = true;

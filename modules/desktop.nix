@@ -10,11 +10,13 @@
 
   programs.uwsm.enable = true;
 
+  # NOTE: programs.hyprland already adds xdg-desktop-portal-hyprland AND
+  # xdg-desktop-portal-gtk to extraPortals. Listing them again here puts the
+  # same unit names in twice and breaks the build with:
+  #   ln: .../user-units/xdg-desktop-portal-hyprland.service: File exists
+  # So only keep the portal *config* (backend order), no extraPortals.
   xdg.portal = {
     enable = true;
-    extraPortals = with pkgs; [
-      xdg-desktop-portal-gtk
-    ];
     config = {
       common = {
         default = [ "gtk" ];
@@ -41,12 +43,16 @@
     };
   };
 
-  # Greeter: greetd with tuigreet
+  # Greeter: greetd with tuigreet.
+  # MUST launch the uwsm-managed session entry (hyprland-uwsm.desktop), NOT
+  # bare `uwsm start hyprland`: the withUWSM Hyprland wrapper warns and skips
+  # UWSM integration otherwise, which breaks every `uwsm-app` autostart
+  # (awww-daemon, hypridle, ...) and leaves waybar/rofi unstyled + no wallpaper.
   services.greetd = {
     enable = true;
     settings = {
       default_session = {
-        command = "${pkgs.tuigreet}/bin/tuigreet --time --remember --remember-session --asterisks --cmd 'uwsm start hyprland'";
+        command = "${pkgs.tuigreet}/bin/tuigreet --time --remember --remember-session --asterisks --cmd 'uwsm start hyprland-uwsm.desktop'";
         user = "greeter";
       };
     };

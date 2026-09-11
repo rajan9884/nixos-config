@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
-# Recreate the install.sh §3 active-theme symlink chain on NixOS.
-# install.sh itself can't run here (it calls pacman/yay). This does ONLY the
-# symlink part. Run once after first home-manager switch, then re-run any
+# Recreate the default-theme symlink chain (default Noro).
+# Run once after first home-manager switch, then re-run any
 # time you want to change the default theme without the rofi switcher.
 # Usage: ACTIVE_THEME=Noro ./theme-chain.sh   (Noro|Material|Retro|Modern|Glass)
 set -euo pipefail
