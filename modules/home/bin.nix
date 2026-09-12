@@ -4,7 +4,6 @@
 { ... }:
 let
   scripts = [
-    "build-hyprexpo"
     "capture-region"
     "capture-satty"
     "capture-screen"

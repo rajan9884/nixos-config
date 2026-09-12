@@ -175,12 +175,18 @@ warm_cache_bg() {
 }
 
 # Print the pick list: newest $LIMIT entries, one row each.
-# Hot path — cache-existence tests only, zero decoding, so
-# filter keystrokes stay instant. Rows print even when their
-# preview isn't rendered yet; they just use the type icon
-# until the background warmer catches up.
+# Hot path — cache-existence tests + shell builtins only, zero
+# decoding and zero forks per row, so filter keystrokes stay
+# instant. Rows print even when their preview isn't rendered yet;
+# they just use the type icon until the background warmer catches
+# up. Display is first-line-only with a length/line-count suffix
+# (multi-line entries used to leak raw newlines into rows).
 print_list() {
-    local line id preview display icon count=0
+    # Rows stream to a temp file (they contain NUL separators, which
+    # bash variables cannot hold) so the dynamic prompt with the
+    # entry count can print first.
+    local tmp line id preview first stripped display icon count=0 extra total_len
+    tmp="$(mktemp -t clip-list.XXXXXX)" || return 0
     while IFS= read -r line; do
         [ -n "$line" ] || continue
         id="${line%%$'\t'*}"
@@ -198,10 +204,19 @@ print_list() {
         elif [[ "$preview" =~ ^(file://)?/[^$'\t']*\.(png|jpe?g|webp|gif|bmp|tiff?)$ ]] \
             && [ -f "${preview#file://}" ]; then
             # Single image file path (file-entry preview).
-            display="${preview##*/}"
+            display="File • ${preview##*/}"
             icon="${preview#file://}"
         else
-            display="${preview:0:140}"
+            # First line only; collapse CRs; note truncation + extra lines.
+            first="${preview%%$'\n'*}"
+            first="${first//$'\r'/}"
+            stripped="${preview//$'\n'/}"
+            extra=$(( ${#preview} - ${#stripped} ))
+            total_len=${#preview}
+            display="${first:0:120}"
+            [ "${#first}" -gt 120 ] && display+="…"
+            [ "$extra" -gt 0 ] && display+="  ↵$((extra + 1)) lines"
+            [ "$total_len" -gt 6000 ] && display+="  (${total_len} chars)"
             [ -z "${display// }" ] && continue
             if [ -s "$CACHE_DIR/pv-$id.png" ]; then
                 icon="$CACHE_DIR/pv-$id.png"
@@ -209,12 +224,18 @@ print_list() {
                 icon="$TEXT_ICON"
             fi
         fi
-        printf '%s\0icon\x1f%s\x1finfo\x1f%s\n' "$display" "$icon" "$id"
+        printf '%s\0icon\x1f%s\x1finfo\x1f%s\n' "$display" "$icon" "$id" >> "$tmp"
         count=$((count + 1))
         [ "$count" -ge "$LIMIT" ] && break
     done < <(cliphist list 2>/dev/null)
     if [ "$count" -eq 0 ]; then
+        rm -f -- "$tmp"
         printf 'Clipboard is empty\0nonselectable\x1ftrue\x1ficon\x1f%s\n' "$TEXT_ICON"
+    else
+        # Dynamic prompt with entry count (rofi script-mode directive).
+        printf '\0prompt\x1fClipboard · %s\n' "$count"
+        cat -- "$tmp"
+        rm -f -- "$tmp"
     fi
 }
 

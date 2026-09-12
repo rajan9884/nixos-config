@@ -35,8 +35,6 @@ hl.bind(mod .. " + ALT + M", hl.dsp.workspace.toggle_special("music"), { descrip
 hl.bind(mod .. " + CTRL + ALT + M", hl.dsp.window.move({ workspace = "special:music", follow = false }), { description = "Move window to music scratchpad" })
 hl.bind(mod .. " + CTRL + Return", hl.dsp.workspace.toggle_special("terminal"), { description = "Toggle terminal scratchpad" })
 hl.bind(mod .. " + CTRL + SHIFT + Return", hl.dsp.window.move({ workspace = "special:terminal", follow = false }), { description = "Move window to terminal scratchpad" })
--- Workspace overview (HyprExpo; no-op until bin/build-hyprexpo has run)
-hl.bind(mod .. " + grave", hl.dsp.exec_cmd("hyprctl dispatch hyprexpo:expo toggle"), { description = "Workspace overview" })
 hl.bind(mod .. " + J", hl.dsp.layout("togglesplit"), { description = "Toggle window split" }) -- togglesplit (layoutmsg)
 hl.bind(mod .. " + SHIFT + F", hl.dsp.exec_cmd(vars.file))
 hl.bind(mod .. " + SHIFT + ALT + F", hl.dsp.exec_cmd(vars.HOME .. "/.local/bin/nautilus-cwd"), { description = "File manager (cwd)" })
@@ -201,7 +199,9 @@ hl.bind(
 
 -- Emoji picker & keybindings cheat sheet (rofi themes pull matugen colors)
 hl.bind(mod .. " + period", hl.dsp.exec_cmd(vars.HOME .. "/.local/bin/menu-emoji"))
-hl.bind(mod .. " + K", hl.dsp.exec_cmd(scripts .. "/keybinds-cheatsheet.sh"))
+hl.bind(mod .. " + K", hl.dsp.exec_cmd(scripts .. "/keybinds-cheatsheet.sh"), { description = "Keybindings cheatsheet" })
+hl.bind(mod .. " + slash", hl.dsp.exec_cmd(scripts .. "/keybinds-cheatsheet.sh"), { description = "Keybindings cheatsheet" })
+hl.bind(mod .. " + SHIFT + A", hl.dsp.exec_cmd(scripts .. "/animations-toggle.sh"), { description = "Toggle animations on/off" })
 
 -- Switch workspaces (1–10; keys 1–9 and 0)
 for i = 1, 10 do
