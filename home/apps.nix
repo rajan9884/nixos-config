@@ -67,11 +67,13 @@ with pkgs; [
   lazygit
   lazydocker
   github-cli
+  gum # gum input/choose prompts (webapp-install hard-requires it)
   jq
   bc
   socat
   inotify-tools
   rsync
+  python3 # swww-all.sh step 7.5 (vscode-theme-apply.py)
   unzip
   wget
 
@@ -105,7 +107,17 @@ with pkgs; [
   nvtopPackages.intel
 
   # Browser (pure Wayland via NIXOS_OZONE_WL)
-  chromium
+  # --load-extension auto-loads the matugen-generated unpacked theme
+  # (~/.config/helium-theme/manifest.json) on every launch, including
+  # --app windows from webapp-launch. swww-all.sh bumps its version per
+  # wallpaper so a browser restart picks up new colors (it notifies you).
+  # The dev-mode nag for unpacked extensions is suppressed.
+  (chromium.override {
+    commandLineArgs = [
+      "--load-extension=/home/rajan/.config/helium-theme"
+      "--disable-features=ExtensionDeveloperModeWarning"
+    ];
+  })
 
   # Wayland / desktop integration
   libappindicator-gtk3

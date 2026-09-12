@@ -90,9 +90,14 @@ if hyprctl clients -j | grep -Fq '"class": "org.gnome.Nautilus"'; then
     nautilus --new-window >/dev/null 2>&1 &
 fi
 
-# 6.5 Reload Neovim
-# SIGUSR1 tells nvim to reload colors
-killall -SIGUSR1 nvim 2>/dev/null
+# 6.5 Neovim
+# nvim has no config-reload signal (SIGUSR1 is trapped but ignored), so
+# running instances keep the previous palette until restarted; new
+# instances read the regenerated matugen-colors.lua. Nudge instead of
+# signaling (a bare kill would be a no-op at best).
+if pgrep -x nvim >/dev/null 2>&1; then
+    notify-send "Neovim Theme Updated" "Restart nvim to apply new colors"
+fi
 
 
 

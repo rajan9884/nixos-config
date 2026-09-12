@@ -243,6 +243,37 @@ in
     };
   };
 
+  # ── Power profile auto-switch: performance on AC, balanced on battery ──
+  # `power-profiles autodetect` already implements this policy (with per-source
+  # memory in ~/.local/state/power-profiles), but Hyprland autostart only runs
+  # it once at login. This path unit re-runs it on every AC plug/unplug.
+  systemd.user.services.power-profiles-autoswitch = {
+    Unit.Description = "Apply remembered power profile for current AC/battery state";
+    Service = {
+      Type = "oneshot";
+      ExecStart = "%h/.local/bin/power-profiles autodetect";
+    };
+  };
+  systemd.user.paths.power-profiles-autoswitch = {
+    Unit.Description = "Watch AC adapter and battery state for power profile switching";
+    Install.WantedBy = [ "default.target" ];
+    Path = {
+      PathChanged = [
+        "/sys/class/power_supply/ACAD/online"
+        "/sys/class/power_supply/BAT1/status"
+      ];
+      Unit = "power-profiles-autoswitch.service";
+    };
+  };
+  # Seed AC=performance / battery=balanced defaults (only if user hasn't set
+  # their own via `power-profiles set`, which remembers per-source prefs).
+  home.activation.seedPowerProfilePrefs =
+    lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+      mkdir -p "$HOME/.local/state/power-profiles"
+      [ -f "$HOME/.local/state/power-profiles/ac" ] || printf 'performance\n' > "$HOME/.local/state/power-profiles/ac"
+      [ -f "$HOME/.local/state/power-profiles/battery" ] || printf 'balanced\n' > "$HOME/.local/state/power-profiles/battery"
+    '';
+
   # ── Packages with NO nixpkgs equivalent (manual step) ──
   # - helium-browser-bin: no nixpkgs package. Option A: Flatpak/WebApp
   #   (`webapp-install` helper already exists). Option B: fetch the upstream
@@ -372,12 +403,17 @@ in
       icon-theme = "Papirus";
       cursor-theme = "Bibata-Modern-Ice";
       cursor-size = 24;
+      # Dark web content: the xdg-desktop-portal Settings backend serves
+      # this to Chromium/Firefox for prefers-color-scheme, so sites match
+      # the dark matugen palette instead of rendering light.
+      color-scheme = "prefer-dark";
     };
   };
 
-  # ── Default apps (imv for images) ──
+  # ── Default apps (imv for images, nautilus for folders) ──
   xdg.mimeApps = {    enable = true;
     defaultApplications = {
+      "inode/directory" = "org.gnome.Nautilus.desktop";
       "image/jpeg" = "imv.desktop";
       "image/png" = "imv.desktop";
       "image/gif" = "imv.desktop";
