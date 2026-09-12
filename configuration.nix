@@ -4,7 +4,7 @@
 {
   imports = [
     ./hardware-configuration.nix
-    ../../modules/desktop.nix
+    ./modules/desktop.nix
   ];
 
   # ── Boot ──────────────────────────────────────

@@ -10,7 +10,7 @@
 let
   # In-store snapshot of the vendored configs. Flakes only see git-tracked
   # files, so `git add files/` after changing anything under it.
-  dotfiles = ../files;
+  dotfiles = ./files;
 in
 {
   home.username = "rajan";
@@ -101,14 +101,143 @@ in
   };
   # ~/.local/bin only. GUI + shells get it via HM sessionPath.
   # (Removed leftovers: mise shims, ~/.opencode/bin, ~/.kilo/bin — all
-  # tools now come from nixpkgs via home/apps.nix, no manual ELFs.)
+  # tools now come from nixpkgs via home.nix, no manual ELFs.)
   home.sessionPath = [
     "$HOME/.local/bin"
   ];
 
-  # ── Packages (Minimal Port: Kitty, Chromium, Bibata, Wayland Desktop) ──
-  # Single source: ./apps.nix — edit that file to add/remove apps.
-  home.packages = import ./apps.nix { inherit pkgs; };
+  # ── Packages ──
+  # Single place to add/remove user apps: edit the list below, rebuild.
+  # Good practice: everything declarative here via nixpkgs.
+  # Bad practices to avoid:
+  #   - `nix-env -i`, `sudo nix-channel`, `nix-shell -p <pkg>` (imperative, not reproducible)
+  #   - `npm i -g`, `pip install --user`, manual tarballs in ~/.local/bin
+  #   - system-wide `environment.systemPackages` for desktop apps (keep that minimal: git/vim/boot tools only)
+  # Use per-project shells instead: `nix shell nixpkgs#foo` for one-off try, `nix develop` + flake.nix for dev.
+  # ── AI CLIs rule: add the nixpkgs name here, rebuild. No manual ELFs. ──
+  home.packages = with pkgs; [
+    # Compositor session & utilities (hyprland is enabled in system config)
+    hypridle
+    hyprlock
+    hyprpicker
+    hyprsunset
+
+    # Bar / launcher / notifications / OSD
+    waybar
+    rofi
+    rofimoji
+    swaynotificationcenter
+    swayosd
+
+    # Wallpaper + theming pipeline
+    awww
+    matugen
+    bibata-cursors
+    papirus-icon-theme
+    # Fallback icon theme: the xdg-desktop-portal Settings backend reports
+    # icon-theme from dconf (default 'Adwaita'). If Adwaita isn't installed,
+    # EVERY icon lookup fails and swayosd shows the same "missing image"
+    # placeholder for volume and brightness OSDs. dconf below sets Papirus,
+    # this package guarantees the Adwaita fallback resolves regardless.
+    adwaita-icon-theme
+    dconf # for `dconf.settings` activation (writes ~/.config/dconf/user)
+    papirus-folders
+    adw-gtk3
+    nwg-look
+    libsForQt5.qt5ct
+    qt6Packages.qt6ct
+
+    # Terminal / editor / multiplexer
+    kitty
+    neovim
+    gcc # nvim-treesitter parsers need a C compiler
+    gnumake
+    tmux
+
+    # Terminal file manager & viewers
+    yazi
+    nautilus # Files (nautilus-cwd / nautilus-gnome helpers)
+    imv
+    mpv
+    ffmpegthumbnailer
+    chafa
+
+    # Core CLI & shell utilities
+    eza
+    bat
+    fd
+    ripgrep
+    tree
+    btop
+    fastfetch
+    cava
+    lazygit
+    lazydocker
+    github-cli
+    gum # gum input/choose prompts (webapp-install hard-requires it)
+    jq
+    bc
+    socat
+    inotify-tools
+    rsync
+    python3 # swww-all.sh step 7.5 (vscode-theme-apply.py)
+    unzip
+    wget
+
+    # Wayland screenshots / clipboard / OCR
+    grim
+    slurp
+    satty
+    wf-recorder
+    wl-clipboard
+    wl-clip-persist
+    cliphist
+    wtype
+    tesseract
+    imagemagick
+
+    # Audio / brightness keys
+    pamixer
+    pulsemixer
+    wiremix
+    wireplumber # wpctl (sink cycling)
+    pulseaudio # pactl (used by ~/.config/hypr/scripts/osd-volume.sh)
+    brightnessctl
+    playerctl
+    psmisc # killall (swww-all.sh)
+    procps # pkill (swww-all.sh)
+    libnotify # notify-send (vol/touchpad feedback)
+
+    # System monitor & network applet
+    networkmanagerapplet
+    iw
+    nvtopPackages.intel
+
+    # Browser (pure Wayland via NIXOS_OZONE_WL)
+    # --load-extension auto-loads the matugen-generated unpacked theme
+    # (~/.config/helium-theme/manifest.json) on every launch, including
+    # --app windows from webapp-launch. swww-all.sh bumps its version per
+    # wallpaper so a browser restart picks up new colors (it notifies you).
+    # The dev-mode nag for unpacked extensions is suppressed.
+    (chromium.override {
+      commandLineArgs = [
+        "--load-extension=/home/rajan/.config/helium-theme"
+        "--disable-features=ExtensionDeveloperModeWarning"
+      ];
+    })
+
+    # Wayland / desktop integration
+    libappindicator-gtk3
+    gsettings-desktop-schemas
+    webp-pixbuf-loader
+
+    # AI CLIs: available in EVERY shell + GUI session via nix profile
+    opencode
+    kilo
+    nodejs
+    bun
+    mise
+  ];
 
   # Media keys go through hypr/scripts/osd-volume.sh, osd-brightness.sh and
   # osd-keyboard-brightness.sh (swayosd-client directly) — no wrappers needed.
@@ -228,7 +357,7 @@ in
       RemainAfterExit = true;
       ExecStart = pkgs.writeShellScript "wallpaper-init" ''
         export ACTIVE_THEME=Noro
-        ${../modules/theme-chain.sh}
+        ${./modules/theme-chain.sh}
         WALL="$HOME/.local/share/wallpapers/noro/nord-wallpaper.jpg"
         [ -f "$WALL" ] || WALL="$(ls "$HOME"/.local/share/wallpapers/noro/*.jpg "$HOME"/.local/share/wallpapers/noro/*.jpeg 2>/dev/null | head -n1)"
         # awww-daemon is started by Hyprland exec-once; wait for its socket.
@@ -305,7 +434,7 @@ in
       grep = "grep --color=auto";
       ff = "fzf";
       # Rebuild from anywhere: absolute flake path, no cd needed.
-      nrs = "sudo nixos-rebuild switch --flake /home/rajan/.config/nixos#laptop";
+      nrs = "sudo nixos-rebuild switch --flake /etc/nixos#laptop";
     };
     # Matches your custom prompt + LS_COLORS + y() + PATH from shell/zshrc.
     # zsh uses `initContent` on current home-manager (initExtra is deprecated).
@@ -336,7 +465,7 @@ in
       grep = "grep --color=auto";
       ff = "fzf";
       # Rebuild from anywhere: absolute flake path, no cd needed.
-      nrs = "sudo nixos-rebuild switch --flake /home/rajan/.config/nixos#laptop";
+      nrs = "sudo nixos-rebuild switch --flake /etc/nixos#laptop";
     };
     initExtra = ''
       # bash on current home-manager still uses `initExtra` (only zsh moved

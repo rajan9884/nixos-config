@@ -1,9 +1,8 @@
 {
-  description = "NixOS + Hyprland — reproducible desktop (configs vendored in ./files)";
+  description = "NixOS + Hyprland — reproducible desktop (lives in /etc/nixos, dotfiles vendored in ./files)";
 
   inputs = {
     # Unstable gives Hyprland 0.55+ (Lua API), awww, matugen, satty, etc.
-    # Pin to a commit after first successful build if you want reproducibility.
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
 
     home-manager = {
@@ -17,7 +16,7 @@
       system = "x86_64-linux";
       specialArgs = { inherit inputs; };
       modules = [
-        ./hosts/laptop/configuration.nix
+        ./configuration.nix
         home-manager.nixosModules.home-manager
         {
           home-manager.useGlobalPkgs = true;
@@ -27,7 +26,7 @@
           # "existing file ... is in the way".
           home-manager.backupFileExtension = "hm-backup";
           home-manager.extraSpecialArgs = { inherit inputs; };
-          home-manager.users.rajan = import ./home/rajan.nix;
+          home-manager.users.rajan = import ./home.nix;
         }
       ];
     };
