@@ -368,6 +368,8 @@
       ff = "fzf";
       # Rebuild from anywhere: absolute flake path, no cd needed.
       nrs = "sudo nixos-rebuild switch --flake /etc/nixos#laptop";
+      # Try any package (incl. unfree) without installing: try nixpkgs#foo
+      try = "NIXPKGS_ALLOW_UNFREE=1 nix shell --impure";
     };
     # Matches your custom prompt + LS_COLORS + y() + PATH from shell/zshrc.
     # zsh uses `initContent` on current home-manager (initExtra is deprecated).
@@ -376,6 +378,13 @@
       export LS_COLORS="di=38;5;45:ln=38;5;75:mh=00:pi=40;33:so=01;35:do=01;35:bd=40;33;01:cd=40;33;01:or=40;31;01:mi=00:su=37;41:sg=30;43:ca=00:tw=30;42:ow=34;42:st=37;44:ex=01;32"
       zstyle ':completion:*' list-colors "''${(s.:.)LS_COLORS}"
       PROMPT=$'\n%{%F{magenta}%}%{%K{magenta}%}%{%F{black}%}  %{%F{white}%} %~ %{%k%}%{%F{magenta}%}%{%f%}\n%{%F{magenta}%}❯ %{%f%}'
+      # Flag nix trial subshells. `nix shell` sets NO marker variable
+      # (IN_NIX_SHELL comes only from `nix develop`/legacy nix-shell),
+      # but it always prepends /nix/store/.../bin entries to PATH —
+      # which a normal NixOS PATH never contains literally.
+      if [[ -n "''${IN_NIX_SHELL:-}" || $PATH == */nix/store/* ]]; then
+        PROMPT="%{%F{yellow}%}[nix-shell] %{%f%}$PROMPT"
+      fi
       RPROMPT=""
       export EDITOR="nvim" VISUAL="nvim"
       export FZF_DEFAULT_OPTS="--height 40% --reverse --border"
@@ -399,6 +408,8 @@
       ff = "fzf";
       # Rebuild from anywhere: absolute flake path, no cd needed.
       nrs = "sudo nixos-rebuild switch --flake /etc/nixos#laptop";
+      # Try any package (incl. unfree) without installing: try nixpkgs#foo
+      try = "NIXPKGS_ALLOW_UNFREE=1 nix shell --impure";
     };
     initExtra = ''
       # bash on current home-manager still uses `initExtra` (only zsh moved
@@ -435,7 +446,21 @@
     enable = true;
     nix-direnv.enable = true;
   };
-  programs.starship.enable = true;
+  programs.starship = {
+    enable = true;
+    settings = {
+      # Starship's native nix_shell module keys off $IN_NIX_SHELL, which
+      # `nix shell` never sets — use a PATH-based custom module instead
+      # (same /nix/store/.../bin signal as the zsh prompt above).
+      nix_shell.disabled = true;
+      custom."nix-shell" = {
+        command = "echo nix-shell";
+        when = "echo \"$PATH\" | grep -q /nix/store";
+        format = "via [$output]($style) ";
+        style = "bold yellow";
+      };
+    };
+  };
   programs.git = {
     enable = true;
     settings = {
