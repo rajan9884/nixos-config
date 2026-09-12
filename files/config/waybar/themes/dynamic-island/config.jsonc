@@ -15,7 +15,6 @@
     "modules-center": [
         "clock",
         "hyprland/workspaces",
-        "custom/updates",
         "bluetooth",
         "pulseaudio",
         "battery",
@@ -72,16 +71,6 @@
         "format-charging": "󰂄",
         "format-plugged": "󰂄",
         "format-icons": ["󰂎", "󰁺", "󰁻", "󰁼", "󰁽", "󰁾", "󰁿", "󰂀", "󰂁", "󰂂", "󰁹"]
-    },
-
-    "custom/updates": {
-        "format": "󰚰",
-        "escape": true,
-        "return-type": "json",
-        "exec": "~/.config/waybar/scripts/updates.sh",
-        "interval": 3600,
-        "on-click": "kitty -e yay -Syu; pkill -RTMIN+8 waybar",
-        "signal": 8
     },
 
     "custom/power": {

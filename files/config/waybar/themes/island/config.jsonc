@@ -23,7 +23,6 @@
         "tray",
         "pulseaudio",
         "battery",
-        "custom/updates",
         "custom/power"
     ],
     // ── Modules ─────────────────────────────────
@@ -108,14 +107,5 @@
         "format": "⏻",
         "on-click": "~/.config/waybar/scripts/power-menu.sh",
         "tooltip": false
-    },
-    "custom/updates": {
-        "format": "󰏗 {}",
-        "escape": true,
-        "return-type": "json",
-        "exec": "~/.config/waybar/scripts/updates.sh",
-        "interval": 3600,
-        "on-click": "kitty -e yay -Syu; pkill -RTMIN+8 waybar",
-        "signal": 8
     }
 }

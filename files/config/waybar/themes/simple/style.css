@@ -40,7 +40,6 @@ window#waybar {
 #pulseaudio,
 #bluetooth,
 #battery,
-#custom-updates,
 #custom-power,
 #custom-voxtype,
 #custom-record,
@@ -70,10 +69,6 @@ window#waybar {
 
 #battery.critical:not(.charging) {
     color: @error;
-}
-
-#custom-updates {
-    color: @secondary;
 }
 
 #custom-power {

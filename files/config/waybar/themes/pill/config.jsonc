@@ -26,7 +26,6 @@
         "pulseaudio",
         "bluetooth",
         "battery",
-        "custom/updates",
         "custom/power"
     ],
 
@@ -137,16 +136,6 @@
         "format": "⏻",
         "tooltip": false,
         "on-click": "~/.config/waybar/scripts/power-menu.sh"
-    },
-
-    "custom/updates": {
-        "format": "󰚰  {}",
-        "escape": true,
-        "return-type": "json",
-        "exec": "~/.config/waybar/scripts/updates.sh",
-        "interval": 3600,
-        "on-click": "kitty -e yay -Syu; pkill -RTMIN+8 waybar",
-        "signal": 8
     },
 
     "custom/record": {

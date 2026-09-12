@@ -24,7 +24,6 @@ window#waybar {
 #battery,
 #cpu,
 #memory,
-#custom-updates,
 #custom-launcher,
 #custom-power,
 #tray,
@@ -114,10 +113,6 @@ window#waybar {
     animation-direction: alternate;
 }
 
-#custom-updates {
-    color: @secondary;
-}
-
 #custom-power {
     color: @error;
     padding-left: 14px;
@@ -144,7 +139,6 @@ window#waybar {
 #battery:hover,
 #cpu:hover,
 #memory:hover,
-#custom-updates:hover,
 #custom-launcher:hover,
 #custom-power:hover,
 #custom-voxtype:hover,

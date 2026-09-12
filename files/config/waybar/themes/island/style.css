@@ -96,8 +96,3 @@ tooltip label {
     padding: 0 10px;
     font-size: 18px;
 }
-
-#custom-updates {
-    padding: 0 8px;
-    color: @secondary;
-}
