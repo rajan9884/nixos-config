@@ -3,7 +3,9 @@
 #   nixos-menu-images — image selector (rofi carousel)
 #   Shows a horizontal carousel of image thumbnails and prints the selected
 #   image path.
-#   Thumbnails come from rofi's XDG thumbnailers (glycin/vips pipeline).
+#   Icons are passed as direct file paths so rofi loads them via gdk-pixbuf
+#   (no dependency on pre-generated ~/.cache/thumbnails XDG cache, which was
+#   missing for jpg/png + most webp and left theme/wallpaper previews blank).
 #   Usage: nixos-menu-images [--selected <image>] [--print-name] [--show-labels]
 #                           [--filterable] [--lazy-thumbnails]
 #                           <image-dir>...
@@ -120,11 +122,12 @@ rofi_args=(
   -theme "$carousel_theme"
 )
 
-# Build rofi input: one line per image, with its thumbnail attached via the
-# XDG thumbnail mechanism (\0icon\x1fthumbnail://<path>).
+# Build rofi input: one line per image, with the full image as its icon.
+# Direct paths (not thumbnail:// URIs) so missing XDG cache entries can't
+# leave entries blank.
 choice=$({
   for i in "${!displays[@]}"; do
-    printf '%s\0icon\x1fthumbnail://%s\n' "${displays[$i]}" "${paths[$i]}"
+    printf '%s\0icon\x1f%s\n' "${displays[$i]}" "${paths[$i]}"
   done
 } | rofi "${rofi_args[@]}" 2>/dev/null)
 
