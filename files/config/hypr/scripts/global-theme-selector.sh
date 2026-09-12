@@ -31,8 +31,8 @@ case "$CHOICE" in
 esac
 
 # ── 1. Apply Selections ──
-ln -sf "$HOME/.config/hypr/themes/$HYPR/theme.conf" "$HOME/.config/hypr/theme.conf"
-# Lua (0.55+) — keep theme.lua in sync if the lua counterpart exists
+# NOTE: theme.conf (.conf layer) is retired — Lua is authoritative, so only
+# theme.lua is relinked. See hyprland.lua.
 if [ -f "$HOME/.config/hypr/themes/$HYPR/theme.lua" ]; then
     ln -sf "$HOME/.config/hypr/themes/$HYPR/theme.lua" "$HOME/.config/hypr/theme.lua"
 fi

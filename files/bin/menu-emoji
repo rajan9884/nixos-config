@@ -66,10 +66,6 @@ case "$MODE" in
             --hidden-descriptions \
             --selector-args "-theme \"$EMOJI_THEME\""
         ;;
-    calc|calc_menu|menu-calc)
-        THEME="$LAUNCHER_THEME"
-        rofi -show calc -modi calc -theme "$THEME"
-        ;;
     clipboard|clipboard_menu|menu-clipboard)
         THEME="$LAUNCHER_THEME"
         sel="$(cliphist list | rofi -dmenu -p "Clipboard" -theme "$THEME")" || exit 0

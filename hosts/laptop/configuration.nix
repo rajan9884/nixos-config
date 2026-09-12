@@ -63,11 +63,14 @@
   zramSwap.enable = true;
   services.fwupd.enable = true;
 
+  # ── Containers (lazydocker keybind SUPER SHIFT+D expects this) ──
+  virtualisation.docker.enable = true;
+
   # ── User ──────────────────────────────────────
   users.users.rajan = {
     isNormalUser = true;
     description = "rajan";
-    extraGroups = [ "wheel" "networkmanager" "video" "audio" "input" ];
+    extraGroups = [ "wheel" "networkmanager" "video" "audio" "input" "docker" ];
     shell = pkgs.zsh;
   };
   programs.zsh.enable = true;

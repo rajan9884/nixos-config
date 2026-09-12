@@ -25,7 +25,6 @@
         "tray",
         "pulseaudio",
         "bluetooth",
-        "network",
         "battery",
         "custom/updates",
         "custom/power"
@@ -65,14 +64,6 @@
         "format-connected": "󰂯",
         "tooltip-format": "{controller_alias}\t{controller_address}\n\n{num_connections} connected",
         "on-click": "~/.config/waybar/scripts/bluetooth-menu.sh"
-    },
-
-    "network": {
-        "interval": 10,
-        "format-wifi": "󰤨",
-        "format-ethernet": "󰈀",
-        "format-disconnected": "󰤭",
-        "on-click": "~/.config/waybar/scripts/wifi-menu.sh"
     },
 
     "battery": {

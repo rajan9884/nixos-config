@@ -30,7 +30,8 @@ case "$THEME_IN" in
 esac
 
 # ── 1. Apply Selections ──
-ln -sf "$HOME/.config/hypr/themes/$HYPR/theme.conf" "$HOME/.config/hypr/theme.conf"
+# NOTE: theme.conf (.conf layer) is retired — Lua is authoritative, so only
+# theme.lua is relinked. See hyprland.lua.
 if [ -f "$HOME/.config/hypr/themes/$HYPR/theme.lua" ]; then
     ln -sf "$HOME/.config/hypr/themes/$HYPR/theme.lua" "$HOME/.config/hypr/theme.lua"
 fi

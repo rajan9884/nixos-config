@@ -12,7 +12,7 @@ HYP_DIR="$HOME/.config/hypr"
 THEME="$HOME/.config/rofi/active-picker.rasi"
 PROMPT="Keybindings"
 
-# Keyboard-driven, instant filtering (see wifi-menu.sh).
+# Keyboard-driven, instant filtering.
 # NOTE: no -kb-row-* flags: rofi 2.0.0-dirty hangs parsing most kb
 # overrides (verified headless). Defaults already include Ctrl+p/n + arrows.
 ROFI_PERF="-show-icons -hover-select -matching fuzzy -sorting-method fzf -sort -tokenize -threads 0 -me-accept-entry MousePrimary -no-fixed-num-lines -i"
@@ -73,7 +73,7 @@ label() {
         *'menu-clipboard'*)                        desc="Clipboard history" ;;
         *'exec_cmd(browser)'*)                     desc="Open browser" ;;
         *'exec_cmd(file)'*)                        desc="Open file manager" ;;
-        *'wifi-menu.sh'*)                          desc="Network menu" ;;
+        *'nmtui'*)                                    desc="Network connections" ;;
         *'power-menu.sh'*)                         desc="Power / logout menu" ;;
         *'bluetooth-menu.sh'*)                     desc="Bluetooth menu" ;;
         *'global-theme-selector.sh'*)              desc="Theme switcher" ;;

@@ -72,7 +72,6 @@ in
   # ── Helper scripts (vendored bin/ → ~/.local/bin, read-only is fine) ──
   home.file = {
     ".local/bin/nixos-menu-images".source = "${dotfiles}/bin/nixos-menu-images";
-    ".local/bin/nixos-screensaver".source = "${dotfiles}/bin/nixos-screensaver";
     ".local/bin/nixos-theme-apply".source = "${dotfiles}/bin/nixos-theme-apply";
     ".local/bin/nixos-theme-switcher".source = "${dotfiles}/bin/nixos-theme-switcher";
     ".local/bin/nixos-wallpaper-picker".source = "${dotfiles}/bin/nixos-wallpaper-picker";
@@ -80,21 +79,15 @@ in
     ".local/bin/capture-region".source = "${dotfiles}/bin/capture-region";
     ".local/bin/capture-satty".source = "${dotfiles}/bin/capture-satty";
     ".local/bin/capture-screen".source = "${dotfiles}/bin/capture-screen";
-    ".local/bin/menu-calc".source = "${dotfiles}/bin/menu-calc";
     ".local/bin/menu-clipboard".source = "${dotfiles}/bin/menu-clipboard";
     ".local/bin/menu-emoji".source = "${dotfiles}/bin/menu-emoji";
     ".local/bin/menu-herdr-keybindings".source = "${dotfiles}/bin/menu-herdr-keybindings";
-    ".local/bin/menu-share".source = "${dotfiles}/bin/menu-share";
-    ".local/bin/menu-share-prompt".source = "${dotfiles}/bin/menu-share-prompt";
     ".local/bin/menu-tmux-keybindings".source = "${dotfiles}/bin/menu-tmux-keybindings";
-    ".local/bin/menu-transcode".source = "${dotfiles}/bin/menu-transcode";
-    ".local/bin/menu-transcode-prompt".source = "${dotfiles}/bin/menu-transcode-prompt";
     ".local/bin/nautilus-cwd".source = "${dotfiles}/bin/nautilus-cwd";
     ".local/bin/nautilus-gnome".source = "${dotfiles}/bin/nautilus-gnome";
     ".local/bin/night-light-toggle".source = "${dotfiles}/bin/night-light-toggle";
     ".local/bin/ocr-extract".source = "${dotfiles}/bin/ocr-extract";
     ".local/bin/power-profiles".source = "${dotfiles}/bin/power-profiles";
-    ".local/bin/ttfx".source = "${dotfiles}/bin/ttfx";
     ".local/bin/wall-selector".source = "${dotfiles}/bin/wall-selector";
     ".local/bin/waybar-selector".source = "${dotfiles}/bin/waybar-selector";
     ".local/bin/webapp-install".source = "${dotfiles}/bin/webapp-install";
@@ -106,222 +99,19 @@ in
     ".local/bin/wifi-share-prompt".source = "${dotfiles}/bin/wifi-share-prompt";
     ".local/bin/window-close-all".source = "${dotfiles}/bin/window-close-all";
   };
-  # ~/.local/bin + mise shims + compat dirs for ~/.opencode/bin +
-  # ~/.kilo/bin installs. All shells + GUI sessions get
-  # these via HM sessionPath (works across logins, not just interactive shells).
+  # ~/.local/bin only. GUI + shells get it via HM sessionPath.
+  # (Removed leftovers: mise shims, ~/.opencode/bin, ~/.kilo/bin — all
+  # tools now come from nixpkgs via home/apps.nix, no manual ELFs.)
   home.sessionPath = [
     "$HOME/.local/bin"
-    "$HOME/.local/share/mise/shims"
-    "$HOME/.opencode/bin"
-    "$HOME/.kilo/bin"
   ];
 
   # ── Packages (Minimal Port: Kitty, Chromium, Bibata, Wayland Desktop) ──
-  home.packages = with pkgs; [
-    # Compositor session & utilities (hyprland is enabled in system config)
-    hypridle
-    hyprlock
-    hyprpicker
-    hyprsunset
+  # Single source: ./apps.nix — edit that file to add/remove apps.
+  home.packages = import ./apps.nix { inherit pkgs; };
 
-    # Bar / launcher / notifications / OSD
-    waybar
-    rofi
-    rofi-calc
-    rofimoji
-    swaynotificationcenter
-    swayosd
-
-    # Wallpaper + theming pipeline
-    awww
-    matugen
-    bibata-cursors
-    papirus-icon-theme
-    # Fallback icon theme: the xdg-desktop-portal Settings backend reports
-    # icon-theme from dconf (default 'Adwaita'). If Adwaita isn't installed,
-    # EVERY icon lookup fails and swayosd shows the same "missing image"
-    # placeholder for volume and brightness OSDs. dconf below sets Papirus,
-    # this package guarantees the Adwaita fallback resolves regardless.
-    adwaita-icon-theme
-    dconf # for `dconf.settings` activation (writes ~/.config/dconf/user)
-    papirus-folders
-    adw-gtk3
-    nwg-look
-    libsForQt5.qt5ct
-    qt6Packages.qt6ct
-
-    # Terminal / editor / multiplexer
-    kitty
-    neovim
-    tmux
-
-    # Terminal file manager & viewers
-    yazi
-    nautilus # Files (nautilus-cwd / nautilus-gnome helpers)
-    imv
-    mpv
-    ffmpegthumbnailer
-    chafa
-
-    # Core CLI & shell utilities
-    eza
-    bat
-    fd
-    ripgrep
-    tree
-    btop
-    fastfetch
-    cava
-    lazygit
-    github-cli
-    jq
-    bc
-    socat
-    inotify-tools
-    rsync
-    unzip
-    wget
-
-    # Wayland screenshots / clipboard / OCR
-    grim
-    slurp
-    satty
-    wf-recorder
-    wl-clipboard
-    wl-clip-persist
-    cliphist
-    wtype
-    tesseract
-    imagemagick
-
-    # Audio / brightness keys
-    pamixer
-    pulsemixer
-    wiremix
-    wireplumber # wpctl (sink cycling)
-    pulseaudio # pactl (used by ~/.config/hypr/scripts/osd-volume.sh)
-    brightnessctl
-    playerctl
-    psmisc # killall (swww-all.sh)
-    procps # pkill (swww-all.sh)
-    libnotify # notify-send (vol/touchpad feedback)
-
-    # System monitor & network applet
-    networkmanagerapplet
-    iw
-    nvtopPackages.intel
-
-    # Browser (pure Wayland via NIXOS_OZONE_WL)
-    chromium
-
-    # Wayland / desktop integration
-    libappindicator-gtk3
-    gsettings-desktop-schemas
-    webp-pixbuf-loader
-
-    # ── AI CLIs: available in EVERY shell + GUI session via nix profile ──
-    # opencode + kilo from nixpkgs (native, no mise/npm needed).
-    # The manual ~/.kilo/bin/kilo fallback + ~/.opencode/bin compat dir keep
-    # working too (nix-ld is enabled system-wide for those ELFs).
-    opencode
-    kilo
-    nodejs
-    bun
-    mise
-  ];
-
-  # Compat shims so helper names resolve across sessions even before
-  # (or without) the nix profile is sourced. ~/.local/bin is already in
-  # sessionPath, so these names resolve everywhere: login shell, tmux, Hyprland
-  # Exec= lines, scripts.
-  # HM (useUserPackages) installs into /etc/profiles/per-user/rajan/bin — that
-  # is the PRIMARY location. ~/.nix-profile is NOT maintained anymore when HM
-  # runs as a NixOS module (no legacy shadow profile), so it is only a fallback.
-  # - opencode: prefer nix package, fall back to ~/.opencode/bin, then mise.
-  # - kilo: prefer nix package, fall back to the manual ~/.kilo/bin/kilo ELF.
-  home.file.".local/bin/opencode" = {
-    executable = true;
-    text = ''
-      #!/usr/bin/env bash
-      for c in \
-        "/run/current-system/sw/bin/opencode" \
-        "/etc/profiles/per-user/rajan/bin/opencode" \
-        "$HOME/.local/state/nix/profiles/profile/bin/opencode" \
-        "$HOME/.nix-profile/bin/opencode" \
-        "$HOME/.opencode/bin/opencode" \
-        "$HOME/.local/share/mise/installs/opencode/latest/opencode"; do
-        if [ -x "$c" ]; then exec "$c" "$@"; fi
-      done
-      echo "opencode not found (per-user profile + ~/.opencode/bin + mise all missing)" >&2
-      exit 127
-    '';
-  };
-  home.file.".local/bin/kilo" = {
-    executable = true;
-    text = ''
-      #!/usr/bin/env bash
-      for c in \
-        "/run/current-system/sw/bin/kilo" \
-        "/etc/profiles/per-user/rajan/bin/kilo" \
-        "$HOME/.local/state/nix/profiles/profile/bin/kilo" \
-        "$HOME/.nix-profile/bin/kilo" \
-        "$HOME/.kilo/bin/kilo"; do
-        if [ -x "$c" ]; then exec "$c" "$@"; fi
-      done
-      echo "kilo not found (per-user profile + ~/.kilo/bin both missing)" >&2
-      exit 127
-    '';
-  };
-
-  # ── Media-key helpers (nixos-* helpers the media.conf binds call) ──
-  # Provided here because no nixpkgs package ships them; without these every
-  # XF86 volume/brightness/touchpad key is dead.
-  # All OSD goes through swayosd-server (see systemd.user.services.swayosd).
-  home.file.".local/bin/nixos-swayosd-client" = {
-    executable = true;
-    text = ''
-      #!/usr/bin/env bash
-      # Passthrough: swayosd-client natively handles
-      # --output-volume raise|lower|mute-toggle|+N|-N
-      exec swayosd-client "$@"
-    '';
-  };
-  home.file.".local/bin/nixos-audio-input-mute" = {
-    executable = true;
-    text = ''
-      #!/usr/bin/env bash
-      exec swayosd-client --input-volume mute-toggle
-    '';
-  };
-  home.file.".local/bin/nixos-brightness-display" = {
-    executable = true;
-    text = ''
-      #!/usr/bin/env bash
-      # nixos-brightness-display [+N%|N%-|N%|off|on] [--no-osd]
-      # Lets swayosd-server perform the change so the OSD always matches.
-      # swayosd --brightness takes raise|lower|+N|-N|ABS (bare numbers clamp,
-      # so 100 always lands on max). Only the 1% minimum is special-cased
-      # via brightnessctl for an exact floor.
-      spec=""
-      for a in "$@"; do
-        case "$a" in --no-osd) ;; *) spec="$a" ;; esac
-      done
-      case "$spec" in
-        "") brightnessctl -m -c backlight 2>/dev/null | head -n1 | awk -F, '{gsub("%","",$5); print $5"%"}'; exit 0 ;;
-        off) brightnessctl -c backlight set 0% 2>/dev/null; exec swayosd-client --brightness 0 ;;
-        on) exec swayosd-client --brightness +5 ;;
-        # swayosd-client --brightness takes +N / -N with NO % sign, and the
-        # incoming spec already carries its sign — so strip only the %.
-        # (The old code prepended an extra sign: "+5%" became "++5" and was
-        # rejected with "Unknown brightness mode".)
-        "+5%"|"+1%") exec swayosd-client --brightness "''${spec%%%}" ;;
-        "5%-"|"1%-") exec swayosd-client --brightness "-''${spec%%%*}" ;;
-        "100%") exec swayosd-client --brightness 100 ;;
-        "1%") brightnessctl -c backlight set 1% 2>/dev/null; exec swayosd-client --brightness 1 ;;
-        *) exec swayosd-client --brightness "$spec" ;;
-      esac
-    '';
-  };
+  # Media keys go through hypr/scripts/osd-volume.sh, osd-brightness.sh and
+  # osd-keyboard-brightness.sh (swayosd-client directly) — no wrappers needed.
   home.file.".local/bin/bright" = {
     executable = true;
     text = ''
@@ -483,6 +273,8 @@ in
       ls = "ls --color=auto";
       grep = "grep --color=auto";
       ff = "fzf";
+      # Rebuild from anywhere: absolute flake path, no cd needed.
+      nrs = "sudo nixos-rebuild switch --flake /home/rajan/.config/nixos#laptop";
     };
     # Matches your custom prompt + LS_COLORS + y() + PATH from shell/zshrc.
     # zsh uses `initContent` on current home-manager (initExtra is deprecated).
@@ -512,13 +304,16 @@ in
       ls = "ls --color=auto";
       grep = "grep --color=auto";
       ff = "fzf";
+      # Rebuild from anywhere: absolute flake path, no cd needed.
+      nrs = "sudo nixos-rebuild switch --flake /home/rajan/.config/nixos#laptop";
     };
     initExtra = ''
       # bash on current home-manager still uses `initExtra` (only zsh moved
       # to `initContent`). Keep this name.
       export FZF_DEFAULT_OPTS="--height 40% --reverse --border"
       export EDITOR="nvim" VISUAL="nvim"
-      export PATH="$HOME/.local/bin:$HOME/.local/share/mise/shims:$HOME/.opencode/bin:$HOME/.kilo/bin:$PATH"
+      # NOTE: no manual PATH export — home.sessionPath already provides
+      # ~/.local/bin. Nix profile bins resolve via /etc/profiles.
       y() {
         local tmp="$(mktemp -t yazi-cwd.XXXXXX)"
         command yazi "$@" --cwd-file="$tmp"

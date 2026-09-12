@@ -39,7 +39,6 @@ window#waybar {
 #clock,
 #pulseaudio,
 #bluetooth,
-#network,
 #battery,
 #custom-updates,
 #custom-power,
@@ -58,10 +57,6 @@ window#waybar {
 }
 
 #bluetooth {
-    color: @on_surface;
-}
-
-#network {
     color: @on_surface;
 }
 

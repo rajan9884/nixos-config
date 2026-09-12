@@ -20,7 +20,6 @@ window#waybar {
 #workspaces,
 #clock,
 #pulseaudio,
-#network,
 #bluetooth,
 #battery,
 #cpu,
@@ -86,10 +85,6 @@ window#waybar {
     color: @tertiary;
 }
 
-#network {
-    color: @primary;
-}
-
 #bluetooth {
     color: @primary;
 }
@@ -145,7 +140,6 @@ window#waybar {
 /* ── Hover Effects ────────────────────────── */
 #clock:hover,
 #pulseaudio:hover,
-#network:hover,
 #bluetooth:hover,
 #battery:hover,
 #cpu:hover,

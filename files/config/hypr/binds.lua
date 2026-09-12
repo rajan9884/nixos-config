@@ -93,7 +93,7 @@ hl.bind(mod .. " + SLASH", hl.dsp.exec_cmd(scripts .. "/monitor-scaling.sh up"),
 hl.bind(mod .. " + ALT + SLASH", hl.dsp.exec_cmd(scripts .. "/monitor-scaling.sh down"), { description = "Monitor scaling down" })
 hl.bind("CTRL + ALT + DELETE", hl.dsp.exec_cmd(vars.HOME .. "/.local/bin/window-close-all"), { locked = true, description = "Close all windows" })
 
-hl.bind(mod .. " + CTRL + W", hl.dsp.exec_cmd("~/.config/waybar/scripts/wifi-menu.sh"))
+hl.bind(mod .. " + CTRL + W", hl.dsp.exec_cmd("kitty -e nmtui"), { description = "Network connections" })
 hl.bind(mod .. " + ESCAPE", hl.dsp.exec_cmd("~/.config/waybar/scripts/power-menu.sh"))
 hl.bind(mod .. " + CTRL + P", hl.dsp.exec_cmd("~/.config/waybar/scripts/power-menu.sh"), { description = "Power / logout menu" })
 hl.bind(mod .. " + CTRL + B", hl.dsp.exec_cmd("~/.config/waybar/scripts/bluetooth-menu.sh"), { description = "Bluetooth menu" })
@@ -101,8 +101,6 @@ hl.bind(mod .. " + ALT + C", hl.dsp.exec_cmd(vars.HOME .. "/.config/waybar/scrip
 hl.bind(mod .. " + CTRL + N", hl.dsp.exec_cmd(vars.HOME .. "/.local/bin/night-light-toggle"), { description = "Toggle nightlight" })
 hl.bind(mod .. " + CTRL + I", hl.dsp.exec_cmd(scripts .. "/idle-toggle.sh"), { description = "Toggle idle lock" })
 hl.bind(mod .. " + CTRL + E", hl.dsp.exec_cmd(vars.HOME .. "/.local/bin/menu-emoji"), { description = "Emojis" })
-hl.bind(mod .. " + CTRL + Q", hl.dsp.exec_cmd(vars.HOME .. "/.local/bin/menu-calc"), { description = "Calculator" })
-hl.bind("XF86Calculator", hl.dsp.exec_cmd(vars.HOME .. "/.local/bin/menu-calc"), { locked = true, description = "Calculator" })
 
 -- Cursor zoom (persistent)
 hl.bind(mod .. " + CTRL + Z", function() local z = hl.get_config("cursor.zoom_factor") or 1; hl.config({ cursor = { zoom_factor = z + 1 } }) end, { description = "Zoom in" })
@@ -140,7 +138,7 @@ hl.bind(mod .. " + ALT + SHIFT + W", hl.dsp.exec_cmd(vars.HOME .. "/.local/bin/w
 hl.bind(mod .. " + ALT + SHIFT + X", hl.dsp.exec_cmd(vars.HOME .. "/.local/bin/webapp-remove-prompt"), { description = "Remove web app" })
 hl.bind(mod .. " + ALT + Q", hl.dsp.exec_cmd(vars.HOME .. "/.local/bin/wifi-share-prompt"), { description = "Share WiFi via QR" })
 
-hl.bind(mod .. " + SHIFT + Space", hl.dsp.exec_cmd("killall -SIGUSR1 waybar"), { locked = true })
+hl.bind(mod .. " + SHIFT + Space", hl.dsp.exec_cmd("killall -q -SIGUSR1 waybar .waybar-wrapped"), { locked = true, description = "Toggle waybar visibility" })
 
 hl.bind(mod .. " + minus", hl.dsp.exec_cmd("hyprctl dispatch resizeactive -100 0"), { repeating = true })
 hl.bind(mod .. " + equal", hl.dsp.exec_cmd("hyprctl dispatch resizeactive 100 0"), { repeating = true })
@@ -349,11 +347,7 @@ hl.bind("SUPER + C", universal_clipboard_shortcut("CTRL", "C", "CTRL", "Insert")
 hl.bind("SUPER + V", universal_clipboard_shortcut("CTRL", "V", "SHIFT", "Insert"), { description = "Universal paste" })
 hl.bind("SUPER + X", send_shortcut_once("CTRL", "X"), { description = "Universal cut" })
 
--- ── Extra menus (kitty+gum, no shell widgets) ──
-
--- Share / transcode (kitty+gum prompts)
-hl.bind(mod .. " + CTRL + S", hl.dsp.exec_cmd(vars.HOME .. "/.local/bin/menu-share-prompt"), { description = "Share clipboard/file" })
-hl.bind(mod .. " + CTRL + period", hl.dsp.exec_cmd(vars.HOME .. "/.local/bin/menu-transcode-prompt"), { description = "Transcode picture/video" })
+-- ── Extra menus ──
 
 -- Herdr keybindings cheatsheet (rofi)
 hl.bind(mod .. " + CTRL + K", hl.dsp.exec_cmd(vars.HOME .. "/.local/bin/menu-herdr-keybindings"), { description = "Herdr keybindings" })
@@ -368,7 +362,5 @@ hl.bind(mod .. " + CTRL + BACKSPACE", function()
 	end
 end, { description = "Toggle single-window square aspect" })
 
--- Screensaver now (kitty + ttfx) / theme menu
-hl.bind(mod .. " + ALT + L", hl.dsp.exec_cmd("kitty --class nixos-screensaver --start-as fullscreen --override window_padding_width=0 --override background_opacity=1.0 -e " .. vars.HOME .. "/.local/bin/nixos-screensaver --now"), { description = "Screensaver now" })
 -- NOTE: SUPER+CTRL+SHIFT+Space is already owned by nixos-theme-switcher above
 -- (same combo, mods are order-insensitive) — do NOT add a theme-menu bind here.

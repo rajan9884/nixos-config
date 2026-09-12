@@ -22,7 +22,6 @@
     "modules-right": [
         "tray",
         "pulseaudio",
-        "network",
         "battery",
         "custom/updates",
         "custom/power"
@@ -62,13 +61,6 @@
             ]
         },
         "on-click": "kitty --class wiremix -e wiremix"
-    },
-    "network": {
-        "interval": 10,
-        "format-wifi": "󰤨",
-        "format-ethernet": "󰈀",
-        "format-disconnected": "󰤭",
-        "on-click": "~/.config/waybar/scripts/wifi-menu.sh"
     },
     "battery": {
         "bat": "BAT0",
