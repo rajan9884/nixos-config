@@ -46,7 +46,7 @@ case "$MODE" in
             read -r choice
             case "$choice" in
                 Lock)     hyprlock ;;
-                Logout)   hyprctl dispatch exit ;;
+                Logout)   hyprctl dispatch "hl.dsp.exit()" ;;
                 Reboot)   systemctl reboot ;;
                 Shutdown) systemctl poweroff ;;
                 Suspend)  systemctl suspend ;;

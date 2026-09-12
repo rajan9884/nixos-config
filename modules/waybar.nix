@@ -23,7 +23,7 @@
         WALL="$(ls "$HOME"/.local/share/wallpapers/noro/*.jpg "$HOME"/.local/share/wallpapers/noro/*.jpeg 2>/dev/null | head -n1)"
       fi
       if [ -n "$WALL" ] && [ -f "$WALL" ]; then
-        ${pkgs.matugen}/bin/matugen image "$WALL" -c "$HOME/.config/matugen/config.toml" --source-color-index 0 || true
+        ${pkgs.matugen}/bin/matugen image "$WALL" --type scheme-content -c "$HOME/.config/matugen/config.toml" --source-color-index 0 || true
       fi
       [ -f "$HOME/.config/waybar/colors.css" ] || : > "$HOME/.config/waybar/colors.css"
     fi

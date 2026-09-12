@@ -23,7 +23,7 @@ printf '%s' "$WALLPAPER" > ~/.cache/current-wallpaper
 
 # 2. Extract colors with Matugen
 # This updates colors for Waybar, Rofi, Kitty, Hyprland, etc.
-matugen image "$WALLPAPER" -c ~/.config/matugen/config.toml --source-color-index 0
+matugen image "$WALLPAPER" --type scheme-content -c ~/.config/matugen/config.toml --source-color-index 0
 
 # 2.5 Update Chromium/Helium theme
 # matugen rewrites ~/.config/helium-theme/manifest.json but keeps

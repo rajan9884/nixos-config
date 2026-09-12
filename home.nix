@@ -86,6 +86,7 @@
     gcc # nvim-treesitter parsers need a C compiler
     gnumake
     tmux
+    herdr
 
     # Terminal file manager & viewers
     yazi
@@ -116,6 +117,7 @@
     python3 # swww-all.sh step 7.5 (vscode-theme-apply.py)
     unzip
     wget
+    file # `file -b --mime-type` (webapp-install icon download hard-requires it)
 
     # Wayland screenshots / clipboard / OCR
     grim
@@ -368,8 +370,6 @@
       ff = "fzf";
       # Rebuild from anywhere: absolute flake path, no cd needed.
       nrs = "sudo nixos-rebuild switch --flake /etc/nixos#laptop";
-      # Try any package (incl. unfree) without installing: try nixpkgs#foo
-      try = "NIXPKGS_ALLOW_UNFREE=1 nix shell --impure";
     };
     # Matches your custom prompt + LS_COLORS + y() + PATH from shell/zshrc.
     # zsh uses `initContent` on current home-manager (initExtra is deprecated).
@@ -380,9 +380,11 @@
       PROMPT=$'\n%{%F{magenta}%}%{%K{magenta}%}%{%F{black}%}  %{%F{white}%} %~ %{%k%}%{%F{magenta}%}%{%f%}\n%{%F{magenta}%}❯ %{%f%}'
       # Flag nix trial subshells. `nix shell` sets NO marker variable
       # (IN_NIX_SHELL comes only from `nix develop`/legacy nix-shell),
-      # but it always prepends /nix/store/.../bin entries to PATH —
-      # which a normal NixOS PATH never contains literally.
-      if [[ -n "''${IN_NIX_SHELL:-}" || $PATH == */nix/store/* ]]; then
+      # and a PATH check is unusable — a normal NixOS session PATH
+      # already contains /nix/store entries (binutils/pciutils wrappers…).
+      # Instead the try() function below exports NIX_TRY_SHELL, which
+      # `nix shell` passes through into the trial shell.
+      if [[ -n "''${IN_NIX_SHELL:-}''${NIX_TRY_SHELL:-}" ]]; then
         PROMPT="%{%F{yellow}%}[nix-shell] %{%f%}$PROMPT"
       fi
       RPROMPT=""
@@ -390,6 +392,14 @@
       export FZF_DEFAULT_OPTS="--height 40% --reverse --border"
       # NOTE: no manual PATH export — home.sessionPath already provides
       # ~/.local/bin, mise shims, ~/.opencode/bin, ~/.kilo/bin.
+      # Try any package (incl. unfree) without installing: try nixpkgs#foo
+      # Function (not alias) so "$@" passes through and a marker var is
+      # set for the prompt: `nix shell` preserves ambient env (only PATH
+      # changes), so NIX_TRY_SHELL survives into the trial shell and
+      # clears automatically on exit (prefix assignment, parent untouched).
+      try() {
+        NIXPKGS_ALLOW_UNFREE=1 NIX_TRY_SHELL=1 nix shell --impure "$@"
+      }
       fastfetch
       y() {
         local tmp="$(mktemp -t yazi-cwd.XXXXXX)"
@@ -408,8 +418,6 @@
       ff = "fzf";
       # Rebuild from anywhere: absolute flake path, no cd needed.
       nrs = "sudo nixos-rebuild switch --flake /etc/nixos#laptop";
-      # Try any package (incl. unfree) without installing: try nixpkgs#foo
-      try = "NIXPKGS_ALLOW_UNFREE=1 nix shell --impure";
     };
     initExtra = ''
       # bash on current home-manager still uses `initExtra` (only zsh moved
@@ -424,6 +432,11 @@
         local cwd="$(cat -- "$tmp" 2>/dev/null)"
         rm -f -- "$tmp"
         [ -n "$cwd" ] && [ "$cwd" != "$PWD" ] && cd -- "$cwd"
+      }
+      # Same try() trial-shell helper as zsh (see above): sets
+      # NIX_TRY_SHELL for Starship's custom nix-shell module below.
+      try() {
+        NIXPKGS_ALLOW_UNFREE=1 NIX_TRY_SHELL=1 nix shell --impure "$@"
       }
       eval "$(starship init bash)"
     '';
@@ -450,12 +463,14 @@
     enable = true;
     settings = {
       # Starship's native nix_shell module keys off $IN_NIX_SHELL, which
-      # `nix shell` never sets — use a PATH-based custom module instead
-      # (same /nix/store/.../bin signal as the zsh prompt above).
+      # `nix shell` never sets — and a PATH check false-positives, since a
+      # normal NixOS session PATH already contains /nix/store entries.
+      # Use the NIX_TRY_SHELL marker set by the try() function instead
+      # (plus IN_NIX_SHELL for `nix develop`/legacy nix-shell).
       nix_shell.disabled = true;
       custom."nix-shell" = {
         command = "echo nix-shell";
-        when = "echo \"$PATH\" | grep -q /nix/store";
+        when = "test -n \"$IN_NIX_SHELL$NIX_TRY_SHELL\"";
         format = "via [$output]($style) ";
         style = "bold yellow";
       };

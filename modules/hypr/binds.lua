@@ -140,20 +140,22 @@ hl.bind(mod .. " + ALT + Q", hl.dsp.exec_cmd(vars.HOME .. "/.local/bin/wifi-shar
 
 hl.bind(mod .. " + SHIFT + Space", hl.dsp.exec_cmd("killall -q -SIGUSR1 waybar .waybar-wrapped"), { locked = true, description = "Toggle waybar visibility" })
 
-hl.bind(mod .. " + minus", hl.dsp.exec_cmd("hyprctl dispatch resizeactive -100 0"), { repeating = true })
-hl.bind(mod .. " + equal", hl.dsp.exec_cmd("hyprctl dispatch resizeactive 100 0"), { repeating = true })
-hl.bind(mod .. " + SHIFT + minus", hl.dsp.exec_cmd("hyprctl dispatch resizeactive 0 -100"), { repeating = true })
-hl.bind(mod .. " + SHIFT + equal", hl.dsp.exec_cmd("hyprctl dispatch resizeactive 0 100"), { repeating = true })
+-- Native dsp resize: `hyprctl dispatch resizeactive …` no longer parses on 0.55+
+-- (hyprctl wraps dispatch args as Lua), so dispatch in-process instead.
+hl.bind(mod .. " + minus", hl.dsp.window.resize({ x = -100, y = 0, relative = true }), { repeating = true })
+hl.bind(mod .. " + equal", hl.dsp.window.resize({ x = 100, y = 0, relative = true }), { repeating = true })
+hl.bind(mod .. " + SHIFT + minus", hl.dsp.window.resize({ x = 0, y = -100, relative = true }), { repeating = true })
+hl.bind(mod .. " + SHIFT + equal", hl.dsp.window.resize({ x = 0, y = 100, relative = true }), { repeating = true })
 
 -- Resize steps: fine (±25) and coarse (±300)
-hl.bind(mod .. " + ALT + minus", hl.dsp.exec_cmd("hyprctl dispatch resizeactive -25 0"), { repeating = true })
-hl.bind(mod .. " + ALT + equal", hl.dsp.exec_cmd("hyprctl dispatch resizeactive 25 0"), { repeating = true })
-hl.bind(mod .. " + SHIFT + ALT + minus", hl.dsp.exec_cmd("hyprctl dispatch resizeactive 0 -25"), { repeating = true })
-hl.bind(mod .. " + SHIFT + ALT + equal", hl.dsp.exec_cmd("hyprctl dispatch resizeactive 0 25"), { repeating = true })
-hl.bind(mod .. " + CTRL + minus", hl.dsp.exec_cmd("hyprctl dispatch resizeactive -300 0"), { repeating = true })
-hl.bind(mod .. " + CTRL + equal", hl.dsp.exec_cmd("hyprctl dispatch resizeactive 300 0"), { repeating = true })
-hl.bind(mod .. " + CTRL + SHIFT + minus", hl.dsp.exec_cmd("hyprctl dispatch resizeactive 0 -300"), { repeating = true })
-hl.bind(mod .. " + CTRL + SHIFT + equal", hl.dsp.exec_cmd("hyprctl dispatch resizeactive 0 300"), { repeating = true })
+hl.bind(mod .. " + ALT + minus", hl.dsp.window.resize({ x = -25, y = 0, relative = true }), { repeating = true })
+hl.bind(mod .. " + ALT + equal", hl.dsp.window.resize({ x = 25, y = 0, relative = true }), { repeating = true })
+hl.bind(mod .. " + SHIFT + ALT + minus", hl.dsp.window.resize({ x = 0, y = -25, relative = true }), { repeating = true })
+hl.bind(mod .. " + SHIFT + ALT + equal", hl.dsp.window.resize({ x = 0, y = 25, relative = true }), { repeating = true })
+hl.bind(mod .. " + CTRL + minus", hl.dsp.window.resize({ x = -300, y = 0, relative = true }), { repeating = true })
+hl.bind(mod .. " + CTRL + equal", hl.dsp.window.resize({ x = 300, y = 0, relative = true }), { repeating = true })
+hl.bind(mod .. " + CTRL + SHIFT + minus", hl.dsp.window.resize({ x = 0, y = -300, relative = true }), { repeating = true })
+hl.bind(mod .. " + CTRL + SHIFT + equal", hl.dsp.window.resize({ x = 0, y = 300, relative = true }), { repeating = true })
 
 -- Move focus (Vim-style)
 hl.bind(mod .. " + H", hl.dsp.focus({ direction = "left" }))
