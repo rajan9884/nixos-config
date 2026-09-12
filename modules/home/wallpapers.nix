@@ -1,13 +1,27 @@
-# Wallpapers — from flake input `wallpapers` (sibling ~/wallpapers repo),
-# NOT vendored in nixos-config (was 95M+ working tree, 183M with history).
-# Pickers only read, so a read-only store symlink is enough (never mutated).
+# Wallpapers — sibling ~/wallpapers repo, linked (NOT copied through /nix/store).
 #
-# Fresh install needs ~/wallpapers present for `path:../wallpapers`:
-#   git clone <remote>/wallpapers.git ~/wallpapers
-#   # or: ~/wallpapers/install.sh  (any distro, no nix needed)
-# assets/fallback-wallpaper.jpg guarantees wallpaper-init still finds
-# noro/nord-wallpaper.jpg even if the input is ever empty.
-{ inputs, ... }:
+# Why not `xdg.dataFile.source = inputs.wallpapers`?
+# A path/flake input would copy 95M+ into /nix/store on EVERY rebuild —
+# the exact bloat we extracted wallpapers to avoid. A symlink costs 0 bytes
+# and keeps ~/wallpapers usable on non-NixOS distros via install.sh.
+#
+# Fresh install order:
+#   1. git clone <remote>/wallpapers.git ~/wallpapers   (before first switch
+#      ideally — otherwise the fallback single-image dir below is used and
+#      replaced on the next rebuild after cloning)
+#   2. rebuild — this activation links ~/.local/share/wallpapers -> ~/wallpapers
+{ pkgs, lib, ... }:
 {
-  xdg.dataFile."wallpapers".source = inputs.wallpapers;
+  home.activation.linkWallpapers = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+    if [ -d "$HOME/wallpapers" ]; then
+      rm -rf "$HOME/.local/share/wallpapers"
+      mkdir -p "$HOME/.local/share"
+      ln -sfn "$HOME/wallpapers" "$HOME/.local/share/wallpapers"
+    else
+      # Fallback: single offline image so wallpaper-init + matugen never fail
+      # on a machine where ~/wallpapers hasn't been cloned yet.
+      mkdir -p "$HOME/.local/share/wallpapers/noro"
+      ${pkgs.coreutils}/bin/cp -f "${../../assets/fallback-wallpaper.jpg}" "$HOME/.local/share/wallpapers/noro/nord-wallpaper.jpg"
+    fi
+  '';
 }

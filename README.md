@@ -2,7 +2,7 @@
 
 ```
 ~/nixos-config/          # this repo (you are here)
-  flake.nix              # inputs: nixpkgs-unstable, home-manager, wallpapers=path:../wallpapers
+  flake.nix              # inputs: nixpkgs-unstable, home-manager (wallpapers NOT an input — symlinked)
   flake.lock             # pinned — commit after every `nix flake update`
   hosts/laptop/
     configuration.nix    # system: boot, Wayland env, pipewire, docker, user, gc
@@ -16,7 +16,7 @@
       hypr.nix + hypr/   # + theme-chain.sh (mutable sync via lib/sync-dir.nix)
       waybar.nix + waybar/ | rofi | kitty | btop | gtk | matugen | nvim | swaync | zed
       rofimoji.nix       # read-only xdg.dataFile (never mutated)
-      wallpapers.nix     # xdg.dataFile from flake input `wallpapers`
+      wallpapers.nix     # symlinks ~/wallpapers -> ~/.local/share/wallpapers (0 store bytes)
   lib/sync-dir.nix       # ONE rsync helper (all app modules use it)
   assets/fallback-wallpaper.jpg  # offline first-boot fallback (noro default)
 ~/wallpapers/            # sibling repo (cross-distro): glass/material/modern/noro/retro/optimized

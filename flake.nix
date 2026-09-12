@@ -1,6 +1,5 @@
 {
   description = "NixOS + Hyprland — reproducible desktop (repo: ~/nixos-config, wallpapers: ~/wallpapers)";
-
   inputs = {
     # Unstable gives Hyprland 0.55+ (Lua API), awww, matugen, satty, etc.
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
@@ -9,17 +8,9 @@
       url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-
-    # Cross-distro wallpaper collection (sibling checkout ~/wallpapers).
-    # After pushing: url = "github:rajan9884/wallpapers";
-    # Kept as flake input so ~/.local/share/wallpapers is declarative
-    # instead of a 95M+ closure embedded in nixos-config itself.
-    # NOTE: path: inputs must exist at `nix flake check` time;
-    # if ~/wallpapers is missing, create it (or `git clone` it) first.
-    wallpapers = {
-      url = "path:../wallpapers";
-      flake = false;
-    };
+    # NOTE: wallpapers intentionally NOT a flake input — ~/wallpapers is
+    # symlinked at activation (modules/home/wallpapers.nix), so 95M+ never
+    # enters /nix/store. Clone it separately (see README + ~/wallpapers).
   };
 
   outputs = { self, nixpkgs, home-manager, ... }@inputs: {
