@@ -4,7 +4,7 @@
 {
   imports = [
     ./hardware-configuration.nix
-    ./modules/desktop.nix
+    ../../modules/system/desktop.nix
   ];
 
   # ── Boot ──────────────────────────────────────
@@ -64,7 +64,23 @@
   services.fwupd.enable = true;
 
   # ── Containers (lazydocker keybind SUPER SHIFT+D expects this) ──
-  virtualisation.docker.enable = true;
+  virtualisation.docker = {
+    enable = true;
+    autoPrune = {
+      enable = true;
+      dates = "weekly";
+    };
+  };
+
+  # Unattended flake updates (system part). Home part stays manual via `nrs`
+  # so a broken Hyprland theme never auto-applies before you can check it.
+  system.autoUpgrade = {
+    enable = true;
+    flake = "/home/rajan/nixos-config#laptop";
+    flags = [ "--update-input" "nixpkgs" "--commit-lock-file" ];
+    dates = "weekly";
+    randomizedDelaySec = "45min";
+  };
 
   # ── User ──────────────────────────────────────
   users.users.rajan = {
@@ -79,10 +95,10 @@
   # (portal GTK settings such as the icon theme) to take effect.
   programs.dconf.enable = true;
 
-  # Run unpatched dynamic binaries (VS Code / language servers / npm tools,
-  # manual ~/.kilo/bin/kilo ELF, mise/node toolchains, opencode plugins).
-  # Libraries mirror the previously-working /etc/nixos setup so kilo keeps
-  # running after switching to this flake.
+  # Run unpatched dynamic binaries (VS Code language servers / npm tools,
+  # mise/node toolchains, opencode plugins).
+  # Each entry needed by: stdenv.cc.cc+zlib+glibc (node/bun/mise ELFs),
+  # openssl+curl (gh, lazygit, language servers), util-linux (uuid libs).
   programs.nix-ld.enable = true;
   programs.nix-ld.libraries = with pkgs; [
     stdenv.cc.cc
@@ -108,12 +124,16 @@
   ];
 
   # ── System packages ───────────────────────────
+  # Minimal on purpose: boot/recovery + git. Desktop apps live in
+  # modules/home/packages.nix (user profile, not system closure).
   environment.systemPackages = with pkgs; [
     git
     neovim
     wget
     curl
     efibootmgr
+    nh # `nh os switch ~/nixos-config` — better output + auto `nix flake check`
+    nix-output-monitor
   ];
 
   # ── Flakes & Nix settings ─────────────────────
@@ -124,9 +144,13 @@
   nix.gc = {
     automatic = true;
     dates = "weekly";
-    options = "--delete-older-than 7d";
+    # 30d (not 7d): with 10+ rebuilds/day, 7d GCs a generation you may
+    # still want to roll back to tomorrow. configurationLimit caps /boot.
+    options = "--delete-older-than 30d";
     persistent = true;
   };
 
+  # Kept at install version on purpose — do NOT bump on every reinstall.
+  # See: https://nixos.org/manual/release-notes.html#sec-upgrading
   system.stateVersion = "25.11";
 }

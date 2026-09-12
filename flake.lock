@@ -39,8 +39,21 @@
     "root": {
       "inputs": {
         "home-manager": "home-manager",
-        "nixpkgs": "nixpkgs"
+        "nixpkgs": "nixpkgs",
+        "wallpapers": "wallpapers"
       }
+    },
+    "wallpapers": {
+      "flake": false,
+      "locked": {
+        "path": "../wallpapers",
+        "type": "path"
+      },
+      "original": {
+        "path": "../wallpapers",
+        "type": "path"
+      },
+      "parent": []
     }
   },
   "root": "root",

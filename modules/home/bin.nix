@@ -1,6 +1,6 @@
-# Helper scripts — sources live in ./bin/, linked into ~/.local/bin.
+# Helper scripts — sources live in modules/home/bin/, linked into ~/.local/bin.
 # Read-only store symlinks are fine here (scripts are never mutated at runtime).
-# Workflow: edit modules/bin/, `git add` it, rebuild.
+# Workflow: edit modules/home/bin/, `git add` it, rebuild.
 { ... }:
 let
   scripts = [

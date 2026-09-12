@@ -1,7 +1,7 @@
-# Matugen config + templates — source lives in ./matugen/, synced as MUTABLE copies.
-# Also creates the generated-only dirs matugen templates write to
-# (fastfetch, helium-theme, ghostty) so matugen never fails on first run.
-# Workflow: edit modules/matugen/, `git add` it, rebuild.
+# Matugen config + templates.
+# Also creates generated-only dirs matugen writes to
+# (fastfetch, helium-theme, ghostty) so first run never fails.
+# Workflow: edit modules/home/matugen/, `git add` it, rebuild.
 { pkgs, lib, ... }:
 {
   home.activation.syncMatugen = lib.hm.dag.entryAfter [ "writeBoundary" ] ''

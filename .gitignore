@@ -1,0 +1,14 @@
+# Nix build outputs
+result
+result-*
+
+# Home-manager backups (created on first switch with colliding dotfiles)
+*.hm-backup
+
+# direnv
+.direnv/
+
+# Editor
+*.swp
+*~
+.vscode/

@@ -1,36 +1,39 @@
 # Home Manager — declarative desktop (packages + services + app modules).
-# Strategy: everything needed to restore this machine lives in this repo.
-#   - App configs live in ./modules/<app>/ (a <app>.nix module + <app>/ dir)
-#     and are synced into place at activation. No ~/dotfiles checkout,
-#     no out-of-store symlinks, no pacman-era installer needed on NixOS.
-#   - Packages are mapped to nixpkgs below.
-#   - Shell (zsh/bash) is natively managed here. Prompt/plugins ported.
+# Repo layout: ~/nixos-config/{flake.nix,hosts/,home/,modules/,lib/,assets/}
+#   - App configs: modules/home/<app>/<app>.nix + <app>/ dir, synced via
+#     lib/sync-dir.nix (mutable copies — matugen/theme-switcher write here).
+#   - Packages: modules/home/packages.nix (by topic).
+#   - Wallpapers: flake input `wallpapers` (sibling ~/wallpapers repo),
+#     see modules/home/wallpapers.nix. No ~/dotfiles checkout needed.
+# Rebuild: `nrs` (switch), `nrb` (build), `nrc` (check). See shellAliases.
 { config, pkgs, lib, ... }:
 
 {
   imports = [
-    ./modules/bin.nix
-    ./modules/btop.nix
-    ./modules/gtk.nix
-    ./modules/hypr.nix
-    ./modules/kitty.nix
-    ./modules/matugen.nix
-    ./modules/nvim.nix
-    ./modules/rofimoji.nix
-    ./modules/rofi.nix
-    ./modules/swaync.nix
-    ./modules/wallpapers.nix
-    ./modules/waybar.nix
-    ./modules/zed.nix
+    ../modules/home/bin.nix
+    ../modules/home/btop.nix
+    ../modules/home/gtk.nix
+    ../modules/home/hypr.nix
+    ../modules/home/kitty.nix
+    ../modules/home/matugen.nix
+    ../modules/home/nvim.nix
+    ../modules/home/packages.nix
+    ../modules/home/rofimoji.nix
+    ../modules/home/rofi.nix
+    ../modules/home/swaync.nix
+    ../modules/home/wallpapers.nix
+    ../modules/home/waybar.nix
+    ../modules/home/zed.nix
   ];
 
   home.username = "rajan";
   home.homeDirectory = "/home/rajan";
+  # Kept at install version on purpose — see hosts/laptop/configuration.nix.
   home.stateVersion = "25.11";
   programs.home-manager.enable = true;
 
-  # Active-theme symlink chain (was: install.sh §3, default Noro).
-  # Run modules/theme-chain.sh once after first switch to initialize.
+  # Active-theme symlink chain (default Noro).
+  # modules/home/hypr/theme-chain.sh recreates it; run once after first switch.
 
   # ~/.local/bin only. GUI + shells get it via HM sessionPath.
   # (Removed leftovers: mise shims, ~/.opencode/bin, ~/.kilo/bin — all
@@ -39,140 +42,9 @@
     "$HOME/.local/bin"
   ];
 
-  # ── Packages ──
-  # Single place to add/remove user apps: edit the list below, rebuild.
-  # Good practice: everything declarative here via nixpkgs.
-  # Bad practices to avoid:
-  #   - `nix-env -i`, `sudo nix-channel`, `nix-shell -p <pkg>` (imperative, not reproducible)
-  #   - `npm i -g`, `pip install --user`, manual tarballs in ~/.local/bin
-  #   - system-wide `environment.systemPackages` for desktop apps (keep that minimal: git/vim/boot tools only)
-  # Use per-project shells instead: `nix shell nixpkgs#foo` for one-off try, `nix develop` + flake.nix for dev.
-  # ── AI CLIs rule: add the nixpkgs name here, rebuild. No manual ELFs. ──
-  home.packages = with pkgs; [
-    # Compositor session & utilities (hyprland is enabled in system config)
-    hypridle
-    hyprlock
-    hyprpicker
-    hyprsunset
-
-    # Bar / launcher / notifications / OSD
-    waybar
-    rofi
-    rofimoji
-    swaynotificationcenter
-    swayosd
-
-    # Wallpaper + theming pipeline
-    awww
-    matugen
-    bibata-cursors
-    papirus-icon-theme
-    # Fallback icon theme: the xdg-desktop-portal Settings backend reports
-    # icon-theme from dconf (default 'Adwaita'). If Adwaita isn't installed,
-    # EVERY icon lookup fails and swayosd shows the same "missing image"
-    # placeholder for volume and brightness OSDs. dconf below sets Papirus,
-    # this package guarantees the Adwaita fallback resolves regardless.
-    adwaita-icon-theme
-    dconf # for `dconf.settings` activation (writes ~/.config/dconf/user)
-    papirus-folders
-    adw-gtk3
-    nwg-look
-    libsForQt5.qt5ct
-    qt6Packages.qt6ct
-
-    # Terminal / editor / multiplexer
-    kitty
-    neovim
-    gcc # nvim-treesitter parsers need a C compiler
-    gnumake
-    tmux
-    herdr
-
-    # Terminal file manager & viewers
-    yazi
-    nautilus # Files (nautilus-cwd / nautilus-gnome helpers)
-    imv
-    mpv
-    ffmpegthumbnailer
-    chafa
-
-    # Core CLI & shell utilities
-    eza
-    bat
-    fd
-    ripgrep
-    tree
-    btop
-    fastfetch
-    cava
-    lazygit
-    lazydocker
-    github-cli
-    gum # gum input/choose prompts (webapp-install hard-requires it)
-    jq
-    bc
-    socat
-    inotify-tools
-    rsync
-    python3 # swww-all.sh step 7.5 (vscode-theme-apply.py)
-    unzip
-    wget
-    file # `file -b --mime-type` (webapp-install icon download hard-requires it)
-
-    # Wayland screenshots / clipboard / OCR
-    grim
-    slurp
-    satty
-    wf-recorder
-    wl-clipboard
-    wl-clip-persist
-    cliphist
-    wtype
-    tesseract
-    imagemagick
-
-    # Audio / brightness keys
-    pamixer
-    pulsemixer
-    wiremix
-    wireplumber # wpctl (sink cycling)
-    pulseaudio # pactl (used by ~/.config/hypr/scripts/osd-volume.sh)
-    brightnessctl
-    playerctl
-    psmisc # killall (swww-all.sh)
-    procps # pkill (swww-all.sh)
-    libnotify # notify-send (vol/touchpad feedback)
-
-    # System monitor & network applet
-    networkmanagerapplet
-    iw
-    nvtopPackages.intel
-
-    # Browser (pure Wayland via NIXOS_OZONE_WL)
-    # --load-extension auto-loads the matugen-generated unpacked theme
-    # (~/.config/helium-theme/manifest.json) on every launch, including
-    # --app windows from webapp-launch. swww-all.sh bumps its version per
-    # wallpaper so a browser restart picks up new colors (it notifies you).
-    # The dev-mode nag for unpacked extensions is suppressed.
-    (chromium.override {
-      commandLineArgs = [
-        "--load-extension=/home/rajan/.config/helium-theme"
-        "--disable-features=ExtensionDeveloperModeWarning"
-      ];
-    })
-
-    # Wayland / desktop integration
-    libappindicator-gtk3
-    gsettings-desktop-schemas
-    webp-pixbuf-loader
-
-    # AI CLIs: available in EVERY shell + GUI session via nix profile
-    opencode
-    kilo
-    nodejs
-    bun
-    mise
-  ];
+  # ── Packages live in ../modules/home/packages.nix (by topic) ──
+  # Add the nixpkgs name there, rebuild. No `nix-env -i`, no `npm i -g`,
+  # no manual ELFs. One-off try: `try nixpkgs#foo`. Project dev: `nix develop`.
 
   # Media keys go through hypr/scripts/osd-volume.sh, osd-brightness.sh and
   # osd-keyboard-brightness.sh (swayosd-client directly) — no wrappers needed.
@@ -292,7 +164,7 @@
       RemainAfterExit = true;
       ExecStart = pkgs.writeShellScript "wallpaper-init" ''
         export ACTIVE_THEME=Noro
-        ${./modules/theme-chain.sh}
+        ${../modules/home/hypr/theme-chain.sh}
         WALL="$HOME/.local/share/wallpapers/noro/nord-wallpaper.jpg"
         [ -f "$WALL" ] || WALL="$(ls "$HOME"/.local/share/wallpapers/noro/*.jpg "$HOME"/.local/share/wallpapers/noro/*.jpeg 2>/dev/null | head -n1)"
         # awww-daemon is started by Hyprland exec-once; wait for its socket.
@@ -369,7 +241,11 @@
       grep = "grep --color=auto";
       ff = "fzf";
       # Rebuild from anywhere: absolute flake path, no cd needed.
-      nrs = "sudo nixos-rebuild switch --flake /etc/nixos#laptop";
+      nrs = "sudo nixos-rebuild switch --flake /home/rajan/nixos-config#laptop";
+      # Build without switching (CI-safe check).
+      nrb = "sudo nixos-rebuild build --flake /home/rajan/nixos-config#laptop";
+      # Stage everything + flake check (run before commit/push).
+      nrc = "git -C /home/rajan/nixos-config add -A && nix flake check /home/rajan/nixos-config";
     };
     # Matches your custom prompt + LS_COLORS + y() + PATH from shell/zshrc.
     # zsh uses `initContent` on current home-manager (initExtra is deprecated).
@@ -417,7 +293,11 @@
       grep = "grep --color=auto";
       ff = "fzf";
       # Rebuild from anywhere: absolute flake path, no cd needed.
-      nrs = "sudo nixos-rebuild switch --flake /etc/nixos#laptop";
+      nrs = "sudo nixos-rebuild switch --flake /home/rajan/nixos-config#laptop";
+      # Build without switching (CI-safe check).
+      nrb = "sudo nixos-rebuild build --flake /home/rajan/nixos-config#laptop";
+      # Stage everything + flake check (run before commit/push).
+      nrc = "git -C /home/rajan/nixos-config add -A && nix flake check /home/rajan/nixos-config";
     };
     initExtra = ''
       # bash on current home-manager still uses `initExtra` (only zsh moved

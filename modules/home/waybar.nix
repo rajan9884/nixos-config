@@ -1,7 +1,7 @@
-# Waybar config — source lives in ./waybar/, synced as MUTABLE copies.
+# Waybar config — source lives in modules/home/waybar/, synced as MUTABLE copies.
 # Mutable (not a store symlink) because matugen writes colors.css here and
 # the theme selector relinks config.jsonc/style.css per theme.
-# Workflow: edit modules/waybar/, `git add` it, rebuild.
+# Workflow: edit modules/home/waybar/, `git add` it, rebuild.
 { pkgs, lib, ... }:
 {
   # Runs after syncMatugen so matugen's config is in place before the
