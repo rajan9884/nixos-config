@@ -1,104 +1,37 @@
-# Home Manager — declarative desktop (packages + services + vendored configs).
+# Home Manager — declarative desktop (packages + services + app modules).
 # Strategy: everything needed to restore this machine lives in this repo.
-#   - App configs are vendored under ./files (config/, bin/, wallpapers/,
-#     rofimoji/) and synced into place at activation. No ~/dotfiles checkout,
+#   - App configs live in ./modules/<app>/ (a <app>.nix module + <app>/ dir)
+#     and are synced into place at activation. No ~/dotfiles checkout,
 #     no out-of-store symlinks, no pacman-era installer needed on NixOS.
 #   - Packages are mapped to nixpkgs below.
 #   - Shell (zsh/bash) is natively managed here. Prompt/plugins ported.
 { config, pkgs, lib, ... }:
 
-let
-  # In-store snapshot of the vendored configs. Flakes only see git-tracked
-  # files, so `git add files/` after changing anything under it.
-  dotfiles = ./files;
-in
 {
+  imports = [
+    ./modules/bin.nix
+    ./modules/btop.nix
+    ./modules/gtk.nix
+    ./modules/hypr.nix
+    ./modules/kitty.nix
+    ./modules/matugen.nix
+    ./modules/nvim.nix
+    ./modules/rofimoji.nix
+    ./modules/rofi.nix
+    ./modules/swaync.nix
+    ./modules/wallpapers.nix
+    ./modules/waybar.nix
+    ./modules/zed.nix
+  ];
+
   home.username = "rajan";
   home.homeDirectory = "/home/rajan";
   home.stateVersion = "25.11";
   programs.home-manager.enable = true;
 
-  # ── App configs, vendored (synced mutable copies) ──
-  # files/config/<app> is COPIED (not symlinked) into ~/.config at activation:
-  # theme switching relinks theme files and matugen writes generated files
-  # (colors.css, colors.lua, …) into these dirs, so they must stay writable.
-  # rsync runs without --delete: vendored files update, generated files survive.
-  # Edit in files/, `git add` it, rebuild — same workflow as before.
-  home.activation.syncVendoredConfig = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-    SRC="${dotfiles}/config"
-    for app in hypr waybar rofi kitty btop matugen nvim zed swaync gtk-3.0 gtk-4.0; do
-      if [ -L "$HOME/.config/$app" ]; then rm "$HOME/.config/$app"; fi
-      mkdir -p "$HOME/.config/$app"
-      ${pkgs.rsync}/bin/rsync -a --chmod=u+w "$SRC/$app/" "$HOME/.config/$app/"
-    done
-    # Single-bar guarantee after every switch (kills any stacked strays).
-    ${pkgs.systemd}/bin/systemctl --user restart waybar.service 2>/dev/null || true
-  '';
-
-  # Generated-only dirs: matugen templates write here.
-  # Created as real dirs so matugen never fails on first run.
-  home.activation.ensureGeneratedConfigDirs = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-    mkdir -p "$HOME/.config/fastfetch" "$HOME/.config/helium-theme" "$HOME/.config/ghostty"
-  '';
-
-  # Matugen colors fallback: waybar's style.css does `@import "colors.css"`
-  # and waybar EXITS if that file is missing. wallpaper-init normally creates
-  # it on first login, but if that unit hasn't run yet (or failed), every
-  # waybar start — including Hyprland's own autostart — crashes instantly and
-  # stacking restarts pile up. Guarantee the file exists at activation using
-  # the default Noro wallpaper. swww-all.sh regenerates it on every wallpaper
-  # change afterwards, so this is only a safety net, never stale for long.
-  home.activation.ensureMatugenColors = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-    if [ ! -f "$HOME/.config/waybar/colors.css" ]; then
-      WALL="$HOME/.local/share/wallpapers/noro/nord-wallpaper.jpg"
-      if [ ! -f "$WALL" ]; then
-        WALL="$(ls "$HOME"/.local/share/wallpapers/noro/*.jpg "$HOME"/.local/share/wallpapers/noro/*.jpeg 2>/dev/null | head -n1)"
-      fi
-      if [ -n "$WALL" ] && [ -f "$WALL" ]; then
-        ${pkgs.matugen}/bin/matugen image "$WALL" -c "$HOME/.config/matugen/config.toml" --source-color-index 0 || true
-      fi
-      # Absolute last resort: an empty import target so waybar at least starts.
-      [ -f "$HOME/.config/waybar/colors.css" ] || : > "$HOME/.config/waybar/colors.css"
-    fi
-  '';
-
   # Active-theme symlink chain (was: install.sh §3, default Noro).
   # Run modules/theme-chain.sh once after first switch to initialize.
 
-  # ── Wallpapers + rofimoji (read-only store symlinks; never mutated) ──
-  xdg.dataFile."wallpapers".source = "${dotfiles}/wallpapers";
-  xdg.dataFile."rofimoji/themes".source = "${dotfiles}/rofimoji/themes";
-
-  # ── Helper scripts (vendored bin/ → ~/.local/bin, read-only is fine) ──
-  home.file = {
-    ".local/bin/nixos-menu-images".source = "${dotfiles}/bin/nixos-menu-images";
-    ".local/bin/nixos-theme-apply".source = "${dotfiles}/bin/nixos-theme-apply";
-    ".local/bin/nixos-theme-switcher".source = "${dotfiles}/bin/nixos-theme-switcher";
-    ".local/bin/nixos-wallpaper-picker".source = "${dotfiles}/bin/nixos-wallpaper-picker";
-    ".local/bin/build-hyprexpo".source = "${dotfiles}/bin/build-hyprexpo";
-    ".local/bin/capture-region".source = "${dotfiles}/bin/capture-region";
-    ".local/bin/capture-satty".source = "${dotfiles}/bin/capture-satty";
-    ".local/bin/capture-screen".source = "${dotfiles}/bin/capture-screen";
-    ".local/bin/menu-clipboard".source = "${dotfiles}/bin/menu-clipboard";
-    ".local/bin/menu-emoji".source = "${dotfiles}/bin/menu-emoji";
-    ".local/bin/menu-herdr-keybindings".source = "${dotfiles}/bin/menu-herdr-keybindings";
-    ".local/bin/menu-tmux-keybindings".source = "${dotfiles}/bin/menu-tmux-keybindings";
-    ".local/bin/nautilus-cwd".source = "${dotfiles}/bin/nautilus-cwd";
-    ".local/bin/nautilus-gnome".source = "${dotfiles}/bin/nautilus-gnome";
-    ".local/bin/night-light-toggle".source = "${dotfiles}/bin/night-light-toggle";
-    ".local/bin/ocr-extract".source = "${dotfiles}/bin/ocr-extract";
-    ".local/bin/power-profiles".source = "${dotfiles}/bin/power-profiles";
-    ".local/bin/wall-selector".source = "${dotfiles}/bin/wall-selector";
-    ".local/bin/waybar-selector".source = "${dotfiles}/bin/waybar-selector";
-    ".local/bin/webapp-install".source = "${dotfiles}/bin/webapp-install";
-    ".local/bin/webapp-install-prompt".source = "${dotfiles}/bin/webapp-install-prompt";
-    ".local/bin/webapp-launch".source = "${dotfiles}/bin/webapp-launch";
-    ".local/bin/webapp-remove".source = "${dotfiles}/bin/webapp-remove";
-    ".local/bin/webapp-remove-prompt".source = "${dotfiles}/bin/webapp-remove-prompt";
-    ".local/bin/wifi-share".source = "${dotfiles}/bin/wifi-share";
-    ".local/bin/wifi-share-prompt".source = "${dotfiles}/bin/wifi-share-prompt";
-    ".local/bin/window-close-all".source = "${dotfiles}/bin/window-close-all";
-  };
   # ~/.local/bin only. GUI + shells get it via HM sessionPath.
   # (Removed leftovers: mise shims, ~/.opencode/bin, ~/.kilo/bin — all
   # tools now come from nixpkgs via home.nix, no manual ELFs.)
@@ -553,7 +486,7 @@ in
   };
 
   # Matugen writes generated files (waybar/colors.css, hypr/colors.lua, …)
-  # into ~/.config at runtime — the vendored tree is only the baseline.
+  # into ~/.config at runtime — modules/<app>/ is only the baseline.
   # Regenerate after changing wallpaper outside the picker:
   #   matugen image ~/.local/share/wallpapers/noro/<pick-one> \
   #     -c ~/.config/matugen/config.toml --source-color-index 0

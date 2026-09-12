@@ -1,5 +1,5 @@
 {
-  description = "NixOS + Hyprland — reproducible desktop (lives in /etc/nixos, dotfiles vendored in ./files)";
+  description = "NixOS + Hyprland — reproducible desktop (lives in /etc/nixos, app configs in ./modules)";
 
   inputs = {
     # Unstable gives Hyprland 0.55+ (Lua API), awww, matugen, satty, etc.
