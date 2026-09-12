@@ -5,6 +5,7 @@
   imports = [
     ./hardware-configuration.nix
     ../../modules/system/desktop.nix
+    ../../modules/system/power.nix
   ];
 
   # ── Boot ──────────────────────────────────────

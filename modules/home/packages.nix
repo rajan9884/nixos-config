@@ -3,7 +3,44 @@
 # Rules: no `nix-env -i`, no `npm i -g`, no manual ELFs in ~/.local/bin.
 # One-off try: `try nixpkgs#foo`. Project dev: `nix develop` + flake.nix.
 { pkgs, ... }:
+let
+  # gdk-pixbuf only decodes formats listed in a loaders.cache file.
+  # Installing webp-pixbuf-loader alone never registers it, which left every
+  # .webp (the whole optimized/ collection) thumbnail-less in rofi menus.
+  # This cache = stock loaders (png/jpg/gif/…) + svg + webp, deployed to a
+  # stable path and baked into our rofi wrapper below.
+  pixbufLoaders = pkgs.runCommand "gdk-pixbuf-loaders.cache" { } ''
+    ${pkgs.gdk-pixbuf.dev}/bin/gdk-pixbuf-query-loaders > $out
+    ${pkgs.gdk-pixbuf.dev}/bin/gdk-pixbuf-query-loaders \
+      ${pkgs.librsvg}/lib/gdk-pixbuf-2.0/2.10.0/loaders/libpixbufloader_svg.so >> $out
+    ${pkgs.gdk-pixbuf.dev}/bin/gdk-pixbuf-query-loaders \
+      ${pkgs.webp-pixbuf-loader}/lib/gdk-pixbuf-2.0/2.10.0/loaders/libpixbufloader-webp.so >> $out
+  '';
+
+  # nixpkgs wraps rofi in a binary wrapper that --set's GDK_PIXBUF_MODULE_FILE
+  # to librsvg's cache (no webp), clobbering any env export — which is why the
+  # menu-script export alone couldn't fix webp thumbnails. Re-wrap the
+  # unwrapped binary with identical gapps args but our webp-inclusive cache.
+  rofiWebp = pkgs.symlinkJoin {
+    name = "rofi-webp";
+    paths = [ pkgs.rofi ];
+    nativeBuildInputs = [ pkgs.makeBinaryWrapper ];
+    postBuild = ''
+      rm "$out/bin/rofi"
+      makeBinaryWrapper ${pkgs.rofi-unwrapped}/bin/rofi "$out/bin/rofi" \
+        --prefix GIO_EXTRA_MODULES : "${pkgs.dconf.lib}/lib/gio/modules" \
+        --set GDK_PIXBUF_MODULE_FILE "${pixbufLoaders}" \
+        --set-default XDG_DATA_DIRS "/usr/local/share/:/usr/share/" \
+        --prefix XDG_DATA_DIRS : "${pkgs.gsettings-desktop-schemas}/share/gsettings-schemas/${pkgs.gsettings-desktop-schemas.name}" \
+        --prefix XDG_DATA_DIRS : "${pkgs.gtk3}/share/gsettings-schemas/${pkgs.gtk3.name}" \
+        --prefix XDG_DATA_DIRS : "${pkgs.rofi}/share" \
+        --prefix XDG_DATA_DIRS : "${pkgs.hicolor-icon-theme}/share"
+    '';
+  };
+in
 {
+  home.file.".cache/gdk-pixbuf/loaders.cache".source = pixbufLoaders;
+
   home.packages = with pkgs; [
     # Compositor session & utilities (hyprland enabled in system config)
     hypridle
@@ -13,7 +50,7 @@
 
     # Bar / launcher / notifications / OSD
     waybar
-    rofi
+    rofiWebp
     rofimoji
     swaynotificationcenter
     swayosd
