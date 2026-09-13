@@ -83,6 +83,24 @@
     randomizedDelaySec = "45min";
   };
 
+  # ── Other OS mounts (dual-boot file access) ──
+  # Friendly paths in Nautilus: /mnt/windows, /mnt/omarchy.
+  # `nofail` so a hibernated Windows (Fast Startup) or a changed
+  # partition can never block boot — the mount is just skipped.
+  # NOTE: turn off Windows Fast Startup (or use Restart, not Shut down,
+  # when coming here) or the NTFS volume arrives hibernated and the
+  # mount is skipped / read-only.
+  fileSystems."/mnt/windows" = {
+    device = "/dev/disk/by-uuid/84045EA2045E9750";
+    fsType = "ntfs3";
+    options = [ "rw" "uid=1000" "gid=100" "noatime" "nofail" ];
+  };
+  fileSystems."/mnt/omarchy" = {
+    device = "/dev/disk/by-uuid/2b2e3c31-3522-41b6-889d-5415f66483d9";
+    fsType = "btrfs";
+    options = [ "rw" "noatime" "nofail" ];
+  };
+
   # ── User ──────────────────────────────────────
   users.users.rajan = {
     isNormalUser = true;
