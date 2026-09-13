@@ -93,12 +93,12 @@
   fileSystems."/mnt/windows" = {
     device = "/dev/disk/by-uuid/84045EA2045E9750";
     fsType = "ntfs3";
-    options = [ "rw" "uid=1000" "gid=100" "noatime" "nofail" ];
+    options = [ "rw" "uid=1000" "gid=100" "noatime" "nofail" "x-gvfs-show" "x-gvfs-name=Windows" ];
   };
   fileSystems."/mnt/omarchy" = {
     device = "/dev/disk/by-uuid/2b2e3c31-3522-41b6-889d-5415f66483d9";
     fsType = "btrfs";
-    options = [ "rw" "noatime" "nofail" ];
+    options = [ "rw" "noatime" "nofail" "x-gvfs-show" "x-gvfs-name=Omarchy" ];
   };
 
   # ── User ──────────────────────────────────────
