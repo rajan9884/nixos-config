@@ -239,7 +239,7 @@
     shellAliases = {
       ls = "ls --color=auto";
       grep = "grep --color=auto";
-      ff = "fzf";
+      ff = "fzf --preview 'bat --color=always {}'";
       # Rebuild from anywhere: absolute flake path, no cd needed.
       nrs = "sudo nixos-rebuild switch --flake /home/rajan/nixos-config#laptop";
       # Build without switching (CI-safe check).
@@ -265,7 +265,7 @@
       fi
       RPROMPT=""
       export EDITOR="nvim" VISUAL="nvim"
-      export FZF_DEFAULT_OPTS="--height 40% --reverse --border"
+      export FZF_DEFAULT_OPTS="--height 90% --reverse --border"
       # NOTE: no manual PATH export — home.sessionPath already provides
       # ~/.local/bin, mise shims, ~/.opencode/bin, ~/.kilo/bin.
       # Try any package (incl. unfree) without installing: try nixpkgs#foo
@@ -291,7 +291,7 @@
     shellAliases = {
       ls = "ls --color=auto";
       grep = "grep --color=auto";
-      ff = "fzf";
+      ff = "fzf --preview 'bat --color=always {}'";
       # Rebuild from anywhere: absolute flake path, no cd needed.
       nrs = "sudo nixos-rebuild switch --flake /home/rajan/nixos-config#laptop";
       # Build without switching (CI-safe check).
@@ -302,7 +302,7 @@
     initExtra = ''
       # bash on current home-manager still uses `initExtra` (only zsh moved
       # to `initContent`). Keep this name.
-      export FZF_DEFAULT_OPTS="--height 40% --reverse --border"
+      export FZF_DEFAULT_OPTS="--height 90% --reverse --border"
       export EDITOR="nvim" VISUAL="nvim"
       # NOTE: no manual PATH export — home.sessionPath already provides
       # ~/.local/bin. Nix profile bins resolve via /etc/profiles.
