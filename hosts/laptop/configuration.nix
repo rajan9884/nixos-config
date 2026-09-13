@@ -114,6 +114,10 @@
   # (portal GTK settings such as the icon theme) to take effect.
   programs.dconf.enable = true;
 
+  # gvfs daemons + D-Bus activation: required by Nautilus/GIO for Trash,
+  # thumbnails, and the /mnt gvfs mounts (x-gvfs-show).
+  services.gvfs.enable = true;
+
   # Run unpatched dynamic binaries (VS Code language servers / npm tools,
   # mise/node toolchains, opencode plugins).
   # Each entry needed by: stdenv.cc.cc+zlib+glibc (node/bun/mise ELFs),
