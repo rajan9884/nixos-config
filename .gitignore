@@ -12,3 +12,31 @@ result-*
 *.swp
 *~
 .vscode/
+
+# Runtime-generated / theme-selector-managed (never commit).
+# - waybar/colors.css is written by matugen on every wallpaper switch
+#   (swww-all.sh); committing it ships a stale palette that overwrites the
+#   live one on every rebuild/boot (the "yellow bar" bug).
+# - waybar/config.jsonc + style.css are theme-selector symlinks into
+#   themes/<name>/; committing them pins the theme back on every sync.
+modules/home/waybar/colors.css
+modules/home/waybar/config.jsonc
+modules/home/waybar/style.css
+# Same class: matugen outputs + theme-selector links for the other apps.
+# Committing them ships stale palettes / pins themes on every boot+rebuild.
+modules/home/hypr/colors.conf
+modules/home/hypr/colors.lua
+modules/home/hypr/hyprlock-colors.conf
+modules/home/hypr/theme.lua
+modules/home/kitty/colors.conf
+modules/home/rofi/colors.rasi
+modules/home/rofi/active-launcher.rasi
+modules/home/rofi/active-picker.rasi
+modules/home/rofi/active-scripts.rasi
+modules/home/gtk-3.0/gtk.css
+modules/home/gtk-4.0/gtk.css
+modules/home/gtk-4.0/gtk-dark.css
+modules/home/swaync/style.css
+modules/home/zed/themes/matugen.json
+modules/home/btop/themes/matugen.theme
+modules/home/nvim/lua/matugen-colors.lua

@@ -166,5 +166,8 @@ in
     nh # `nh os switch` / `nh home switch` / `nh clean`
     nil # Nix LSP (Zed/nvim)
     nixd # Nix LSP (alt)
+    
+    # Text editor
+    gnome-text-editor
   ];
 }
