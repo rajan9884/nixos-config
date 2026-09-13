@@ -392,10 +392,11 @@
     };
   };
 
-  # ── Default apps (imv for images, nautilus for folders) ──
+  # ── Default apps (imv for images, nautilus for folders, Text Editor for text) ──
   xdg.mimeApps = {    enable = true;
     defaultApplications = {
       "inode/directory" = "org.gnome.Nautilus.desktop";
+      "text/plain" = "org.gnome.TextEditor.desktop";
       "image/jpeg" = "imv.desktop";
       "image/png" = "imv.desktop";
       "image/gif" = "imv.desktop";
@@ -404,6 +405,19 @@
       "image/tiff" = "imv.desktop";
     };
   };
+  # mimeapps.list is generated into the nix store (read-only symlink), but
+  # Nautilus / gio "set as default" rewrites it in place — which fails with
+  # "Read-only file system". Materialize a writable copy after every
+  # activation: HM defaults are re-applied on rebuild, GUI edits made
+  # afterwards stick until the next rebuild.
+  home.activation.materializeMimeapps =
+    lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+      f="$HOME/.config/mimeapps.list"
+      if [ -L "$f" ]; then
+        cp -L "$f" "$f.tmp" && mv -f "$f.tmp" "$f"
+      fi
+      [ -f "$f" ] && chmod u+w "$f"
+    '';
 
   # Matugen writes generated files (waybar/colors.css, hypr/colors.lua, …)
   # into ~/.config at runtime — modules/<app>/ is only the baseline.
