@@ -1,0 +1,52 @@
+#!/usr/bin/env bash
+# ──────────────────────────────────────────────
+#   wallpapers-sync — flatten-copy ~/wallpapers -> ~/.local/share/wallpapers
+#   Usage: wallpapers-sync [--src DIR] [--dest DIR]
+#   Copies EVERY image under SRC (any depth, .git excluded) flat into DEST
+#   (no subdirectories). Name collisions get a parent-dir / numeric suffix.
+#   Same logic as modules/home/wallpapers.nix activation (keep them in sync).
+# ──────────────────────────────────────────────
+set -euo pipefail
+SRC="${1:-}"
+DEST="${2:-}"
+# long-flag form too: wallpapers-sync --src DIR --dest DIR
+while [ $# -gt 0 ]; do
+  case "$1" in
+    --src)  SRC="${2:?--src needs a dir}"; shift 2 ;;
+    --dest) DEST="${2:?--dest needs a dir}"; shift 2 ;;
+    -h|--help) echo "Usage: wallpapers-sync [--src DIR] [--dest DIR]"; exit 0 ;;
+    *) shift ;;
+  esac
+done
+[ -n "$SRC" ] || SRC="$HOME/wallpapers"
+[ -n "$DEST" ] || DEST="${XDG_DATA_HOME:-$HOME/.local/share}/wallpapers"
+
+[ -d "$SRC" ] || { echo "wallpapers-sync: source not found: $SRC" >&2; echo "clone it first: git clone https://github.com/rajan9884/wallpapers.git ~/wallpapers" >&2; exit 1; }
+# Legacy layout was a symlink DEST -> ~/wallpapers; replace with a real dir.
+if [ -L "$DEST" ]; then rm -f "$DEST"; fi
+mkdir -p "$DEST"
+# DEST is files-only by contract; drop stale nested dirs from old layouts.
+find "$DEST" -mindepth 1 -maxdepth 1 -type d -exec rm -rf {} + 2>/dev/null || true
+find "$DEST" -mindepth 1 -maxdepth 1 -type l -exec rm -f {} + 2>/dev/null || true
+
+count=0
+while IFS= read -r -d '' src; do
+  base="$(basename "$src")"
+  dest="$DEST/$base"
+  if [ -e "$dest" ] && ! cmp -s "$src" "$dest"; then
+    stem="${base%.*}"
+    ext="${base##*.}"
+    if [ "$stem" = "$ext" ]; then ext=""; else ext=".$ext"; fi
+    parent="$(basename "$(dirname "$src")")"
+    dest="$DEST/${stem}_${parent}${ext}"
+    n=1
+    while [ -e "$dest" ] && ! cmp -s "$src" "$dest"; do
+      n=$((n + 1))
+      dest="$DEST/${stem}_${parent}_${n}${ext}"
+    done
+  fi
+  cp -f "$src" "$dest"
+  count=$((count + 1))
+done < <(find "$SRC" -path "$SRC/.git" -prune -o -type f \( -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.png' -o -iname '*.webp' \) -print0)
+
+echo "wallpapers-sync: $count images flat -> $DEST"

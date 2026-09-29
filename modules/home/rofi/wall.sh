@@ -20,12 +20,14 @@ if [[ -n "$selected" ]]; then
     dconf write /org/gnome/desktop/interface/icon-theme "'Papirus'" 2>/dev/null || true
 else
     pairs=()
-    for f in "$WALL_DIR"/*.jpg "$WALL_DIR"/*.png "$WALL_DIR"/*.jpeg; do
-        [[ -e "$f" ]] || continue
+    # Flat store: files directly in WALL_DIR (wallpapers-sync). maxdepth 2
+    # keeps back-compat with the old nested layout (Wallpaper/, noro/, …).
+    while IFS= read -r -d '' f; do
         base=$(basename "$f")
+        rel="${f#$WALL_DIR/}"  # flat store: == $base; keeps legacy subdirs working
         name_part="${base%.*}"
         pretty=$(echo "$name_part" | tr '_-' '  ' | sed -e "s/\b\(.\)/\u\1/g" -e 's/ ([0-9]\+)$//')
-        pairs+=("$pretty" "$base")
+        pairs+=("$pretty" "$rel")
 
         thumb="${THUMB_DIR}/${base}.png"
         if [[ ! -e "$thumb" || "$f" -nt "$thumb" ]]; then
@@ -39,7 +41,7 @@ else
         [[ -e "$icon_path" ]] || icon_path="$f"
 
         printf '%s\0icon\x1f%s\n' "$pretty" "$icon_path"
-    done
+    done < <(find "$WALL_DIR" -maxdepth 2 -type f \( -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.png' -o -iname '*.webp' \) -print0 2>/dev/null | sort -z)
 
     jq -n '
         def pairs2obj(a): reduce range(0; a|length; 2) as $i ({}; . + {(a[$i]): a[$i+1]});

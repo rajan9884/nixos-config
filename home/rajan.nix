@@ -165,8 +165,23 @@
       ExecStart = pkgs.writeShellScript "wallpaper-init" ''
         export ACTIVE_THEME=Noro
         ${../modules/home/hypr/theme-chain.sh}
-        WALL="$HOME/.local/share/wallpapers/noro/nord-wallpaper.jpg"
-        [ -f "$WALL" ] || WALL="$(ls "$HOME"/.local/share/wallpapers/noro/*.jpg "$HOME"/.local/share/wallpapers/noro/*.jpeg 2>/dev/null | head -n1)"
+        # Flat wallpaper store: ~/.local/share/wallpapers/*.jpg (no subdirs).
+        # Prefer the remembered wallpaper, then the fallback image, then
+        # first sorted image in the flat dir.
+        WALL=""
+        if [ -f "$HOME/.cache/current-wallpaper" ]; then
+          WALL="$(cat "$HOME/.cache/current-wallpaper")"
+        fi
+        if [ -z "$WALL" ] || [ ! -f "$WALL" ]; then
+          for cand in "$HOME/.local/share/wallpapers/nord-wallpaper.jpg" \
+                       "$HOME/.local/share/wallpapers/fallback-wallpaper.jpg"; do
+            if [ -f "$cand" ]; then WALL="$cand"; break; fi
+          done
+        fi
+        if [ -z "$WALL" ] || [ ! -f "$WALL" ]; then
+          WALL="$(find "$HOME/.local/share/wallpapers" -maxdepth 1 -type f \
+            \( -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.png' -o -iname '*.webp' \) 2>/dev/null | sort | head -n1)"
+        fi
         # awww-daemon is started by Hyprland exec-once; wait for its socket.
         for _i in $(seq 1 60); do
           if [ -S "''${XDG_RUNTIME_DIR:-/run/user/$UID}/awww-''${WAYLAND_DISPLAY:-wayland-1}.socket" ]; then break; fi
@@ -421,7 +436,8 @@
 
   # Matugen writes generated files (waybar/colors.css, hypr/colors.lua, …)
   # into ~/.config at runtime — modules/<app>/ is only the baseline.
+  # Wallpapers live FLAT in ~/.local/share/wallpapers/ (wallpapers-sync).
   # Regenerate after changing wallpaper outside the picker:
-  #   matugen image ~/.local/share/wallpapers/noro/<pick-one> \
+  #   matugen image "$(find ~/.local/share/wallpapers -maxdepth 1 -type f | sort | head -n1)" \
   #     -c ~/.config/matugen/config.toml --source-color-index 0
 }

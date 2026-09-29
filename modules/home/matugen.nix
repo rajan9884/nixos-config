@@ -36,11 +36,16 @@
       if [ -f "$HOME/.cache/current-wallpaper" ]; then
         WALL="$(cat "$HOME/.cache/current-wallpaper")"
       fi
+      # Flat store: ~/.local/share/wallpapers/*.jpg (no noro/ subdir).
       if [ -z "$WALL" ] || [ ! -f "$WALL" ]; then
-        WALL="$HOME/.local/share/wallpapers/noro/nord-wallpaper.jpg"
-        if [ ! -f "$WALL" ]; then
-          WALL="$(ls "$HOME"/.local/share/wallpapers/noro/*.jpg "$HOME"/.local/share/wallpapers/noro/*.jpeg 2>/dev/null | head -n1)"
-        fi
+        for cand in "$HOME/.local/share/wallpapers/nord-wallpaper.jpg" \
+                     "$HOME/.local/share/wallpapers/fallback-wallpaper.jpg"; do
+          if [ -f "$cand" ]; then WALL="$cand"; break; fi
+        done
+      fi
+      if [ -z "$WALL" ] || [ ! -f "$WALL" ]; then
+        WALL="$(find "$HOME/.local/share/wallpapers" -maxdepth 1 -type f \
+          \( -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.png' -o -iname '*.webp' \) 2>/dev/null | sort | head -n1)"
       fi
       if [ -n "$WALL" ] && [ -f "$WALL" ]; then
         ${pkgs.matugen}/bin/matugen image "$WALL" --type scheme-content -c "$HOME/.config/matugen/config.toml" --source-color-index 0 || true

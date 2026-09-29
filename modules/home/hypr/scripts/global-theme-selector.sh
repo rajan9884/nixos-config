@@ -22,11 +22,11 @@ case "$CHOICE" in
     *"Change Waybar Style"*)
         ~/.config/hypr/scripts/waybar-selector.sh
         exit 0 ;;
-    *"Material"*) THEME="Material"; HYPR="material"; WAYBAR="floating-bar"; WALL="material" ;;
-    *"Retro"*)    THEME="Retro";    HYPR="retro";    WAYBAR="retro-left";   WALL="retro" ;;
-    *"Modern"*)   THEME="Modern";   HYPR="modern";   WAYBAR="bottom-dock";  WALL="modern" ;;
-    *"Glass"*)    THEME="Glass";    HYPR="glass";    WAYBAR="glass-right";  WALL="glass" ;;
-    *"Noro"*)     THEME="Noro";     HYPR="noro";     WAYBAR="noro";         WALL="noro" ;;
+    *"Material"*) THEME="Material"; HYPR="material"; WAYBAR="floating-bar" ;;
+    *"Retro"*)    THEME="Retro";    HYPR="retro";    WAYBAR="retro-left" ;;
+    *"Modern"*)   THEME="Modern";   HYPR="modern";   WAYBAR="bottom-dock" ;;
+    *"Glass"*)    THEME="Glass";    HYPR="glass";    WAYBAR="glass-right" ;;
+    *"Noro"*)     THEME="Noro";     HYPR="noro";     WAYBAR="noro" ;;
     *) exit 0 ;;
 esac
 
@@ -45,9 +45,9 @@ ln -sf "$HOME/.config/rofi/themes/$HYPR/picker.rasi" "$HOME/.config/rofi/active-
 # ── 2. Save active theme ──
 echo "$THEME" > "$ACTIVE_THEME_FILE"
 
-# ── 3. Apply Wallpaper (Random from full collection, not just theme) ──
-OPT_DIR="$HOME/Pictures/Wallpapers/optimized"
-SELECTED_WALL=$(find "$WALL_DIR" "$OPT_DIR" -type f \( -iname "*.jpg" -o -iname "*.png" -o -iname "*.jpeg" -o -iname "*.webp" \) 2>/dev/null | shuf -n 1)
+# ── 3. Apply Wallpaper (random from the flat collection) ──
+# Flat store: ~/.local/share/wallpapers/*.jpg (wallpapers-sync, no subdirs).
+SELECTED_WALL=$(find "$WALL_DIR" -maxdepth 1 -type f \( -iname "*.jpg" -o -iname "*.png" -o -iname "*.jpeg" -o -iname "*.webp" \) 2>/dev/null | shuf -n 1)
 [ -n "$SELECTED_WALL" ] && "$SWWW_SCRIPT" "$SELECTED_WALL"
 
 # ── 4. Reload ──

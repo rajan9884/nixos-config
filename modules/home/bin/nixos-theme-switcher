@@ -36,11 +36,15 @@ find_preview() {
     return
   fi
 
-  # Fallback: first wallpaper in the matching ~/wallpapers/<theme> collection.
+  # Fallback: flat wallpaper store (~/.local/share/wallpapers, files only).
+  # Prefer the matching ~/wallpapers/<theme> collection when it exists
+  # (legacy per-theme layout), else any image from the flat dir.
   local wall_dir
   wall_dir="$WALL_DIR/$(basename "$theme_path" | lower)"
   if [[ -d $wall_dir ]]; then
     find -L "$wall_dir" -maxdepth 1 -type f \( -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.png' -o -iname '*.webp' \) -print 2>/dev/null | sort | head -n 1
+  else
+    find -L "$WALL_DIR" -maxdepth 2 -type f \( -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.png' -o -iname '*.webp' \) -print 2>/dev/null | sort | head -n 1
   fi
 }
 

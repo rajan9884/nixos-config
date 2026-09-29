@@ -21,6 +21,7 @@ let
     "ocr-extract"
     "power-profiles"
     "wall-selector"
+    "wallpapers-sync"
     "waybar-selector"
     "webapp-install"
     "webapp-install-prompt"
