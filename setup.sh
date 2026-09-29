@@ -60,6 +60,16 @@ if [ "$(id -u)" -eq 0 ]; then
   warn "run as your normal user (with sudo rights), NOT as root."
   exit 1
 fi
+# Refuse the minimal-ISO installer shell: this script deploys onto a booted
+# INSTALLED system (it rebuilds / and symlinks /etc/nixos). On the ISO,
+# finish mounting + nixos-install + reboot first (see INSTALL.md).
+if [ "$(findmnt -n -o FSTYPE / 2>/dev/null)" = tmpfs ] \
+  || grep -qs 'VARIANT.*[Ii]nstaller' /etc/os-release 2>/dev/null; then
+  warn "you're in the installer live environment, not the installed system."
+  warn "Here, do only: nixos-generate-config --root /mnt, edit the minimal"
+  warn "config, nixos-install, reboot — THEN run setup.sh. See INSTALL.md."
+  exit 1
+fi
 command -v sudo >/dev/null || { warn "sudo is required."; exit 1; }
 
 # Where does this checkout live? Prefer the real script dir (clone-first
