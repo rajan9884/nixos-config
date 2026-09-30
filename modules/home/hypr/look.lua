@@ -25,8 +25,8 @@ hl.animation({ leaf = "specialWorkspace", enabled = ANIM_ENABLED, speed = 3.5, b
 hl.animation({ leaf = "layers", enabled = ANIM_ENABLED, speed = 4, bezier = "easeOutExpo", style = "slide" })
 
 -- ── Focus clarity: dim + slightly fade inactive windows ──
--- Merges per-key with the theme's decoration block (rounding/blur/shadow
--- live in themes/*/theme.lua); verified via `hyprctl getoption`.
+-- Merges per-key with the static decoration block (rounding/blur/shadow
+-- live in theme.lua); verified via `hyprctl getoption`.
 hl.config({
 	decoration = {
 		dim_inactive = true,
@@ -65,5 +65,8 @@ hl.config({
 		disable_logs = true,
 		-- vfr moved here from misc.vfr (0.55)
 		vfr = true,
+	},
+	xwayland = {
+		enabled = false,
 	},
 })

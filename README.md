@@ -17,9 +17,8 @@
     home/
       packages.nix       # user packages BY TOPIC (edit here, `nrs`)
       bin.nix + bin/     # ~/.local/bin helpers (store symlinks, immutable) incl. wallpapers-sync
-      hypr.nix + hypr/   # + theme-chain.sh (mutable sync via lib/sync-dir.nix)
-      waybar.nix + waybar/ | rofi | kitty | btop | gtk | matugen | nvim | swaync | zed
-      rofimoji.nix       # read-only xdg.dataFile (never mutated)
+      hypr.nix + hypr/     # mutable sync via lib/sync-dir.nix
+      waybar.nix + waybar/ | rofi | foot | btop | gtk | matugen | nvim | swaync | zed | fastfetch
       wallpapers.nix     # flatten-copies ~/wallpapers -> ~/.local/share/wallpapers (0 store bytes, no subdirs)
   lib/sync-dir.nix       # ONE rsync helper (all app modules use it)
   assets/fallback-wallpaper.jpg  # offline first-boot fallback (single image, flat store)
@@ -62,7 +61,7 @@ bash <(curl -fsSL https://raw.githubusercontent.com/rajan9884/nixos-config/main/
 Then once, after first login via tuigreet:
 
 ```bash
-ACTIVE_THEME=Noro ~/.config/hypr/theme-chain.sh
+pick a wallpaper:  <Super>+Ctrl+Space  (or Super+R for random)
 ```
 
 ## Fresh install (manual)
@@ -77,7 +76,7 @@ sudo nixos-generate-config --show-hardware-config > ~/nixos-config/hosts/laptop/
 # First switch (HM backs up colliding ~/.config files to *.hm-backup):
 sudo nixos-rebuild switch --flake ~/nixos-config#laptop
 # Once: init theme chain + wallpaper (then reboot, log in via tuigreet):
-ACTIVE_THEME=Noro ~/.config/hypr/theme-chain.sh
+pick a wallpaper:  <Super>+Ctrl+Space  (or Super+R for random)
 ```
 
 > Username: the flake hardcodes user `rajan`. If your user differs,

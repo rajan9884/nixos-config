@@ -1,18 +1,16 @@
 #!/usr/bin/env bash
 # ──────────────────────────────────────────────
 #   nixos-wallpaper-picker — quattro-style wallpaper picker.
-#   Horizontal thumbnail carousel over the flat wallpaper store
-#   (~/.local/share/wallpapers, files only — see wallpapers-sync); the chosen
-#   image is applied through swww-all.sh (set + matugen palette + reloads).
+#   Horizontal thumbnail carousel over the single flat collection in
+#   ~/.local/share/wallpapers/Wallpaper/; the chosen image is applied
+#   through swww-all.sh (set + matugen palette + reloads).
 # ──────────────────────────────────────────────
 
-WALL_DIR="$HOME/.local/share/wallpapers"
+WALL_DIR="$HOME/.local/share/wallpapers/Wallpaper"
 SWWW_SCRIPT="$HOME/.config/hypr/scripts/swww-all.sh"
 
 [ -d "$WALL_DIR" ] || { echo "Wallpaper directory not found: $WALL_DIR" >&2; exit 1; }
 
-# Flat store: hand the dir itself to nixos-menu-images (it scans one level
-# deep, which covers files directly inside WALL_DIR).
 image=$("$HOME/.local/bin/nixos-menu-images" \
   --show-labels --filterable --lazy-thumbnails "$WALL_DIR")
 

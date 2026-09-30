@@ -33,7 +33,7 @@
     // ── Modules ─────────────────────────────────
 
     "custom/launcher": {
-        "format": "",
+        "format": "",
         "on-click": "rofi -show drun -theme ~/.config/rofi/theme.rasi",
         "tooltip": false
     },
@@ -78,7 +78,7 @@
             "car": "",
             "default": ["󰕿", "󰖀", "󰕾"]
         },
-        "on-click": "kitty --class wiremix -e wiremix"
+        "on-click": "foot --app-id wiremix -e wiremix"
     },
 
     "bluetooth": {

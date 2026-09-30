@@ -22,7 +22,7 @@ printf '%s' "$WALLPAPER" > ~/.cache/current-wallpaper
 (magick "$WALLPAPER" ~/.cache/hyprlock-bg.jpg 2>/dev/null) & disown 2>/dev/null
 
 # 2. Extract colors with Matugen
-# This updates colors for Waybar, Rofi, Kitty, Hyprland, etc.
+# This updates colors for Waybar, Rofi, Foot, Hyprland, etc.
 matugen image "$WALLPAPER" --type scheme-content -c ~/.config/matugen/config.toml --source-color-index 0
 
 # 2.5 Update Chromium/Helium theme
@@ -62,19 +62,9 @@ systemctl --user restart waybar.service 2>/dev/null || {
     setsid waybar >/dev/null 2>&1 < /dev/null &
 }
 
-# 3.5 Refresh nm-applet so its tray right-click menu picks up the new GTK CSS
-# (GTK parses gtk.css once at process startup, same as the note above).
-# Managed by the xdg-autostart generator unit — restart re-reads the theme
-# without stacking duplicate applets.
-systemctl --user restart 'app-nm\x2dapplet@autostart.service' 2>/dev/null || {
-    pkill -x nm-applet 2>/dev/null; pkill -x .nm-applet-wrap 2>/dev/null
-    sleep 0.5
-    setsid nm-applet >/dev/null 2>&1 < /dev/null &
-}
-
-# 4. Reload Kitty
-# SIGUSR1 tells kitty to reload its configuration
-killall -SIGUSR1 kitty
+# 4. Reload Foot
+# SIGUSR1 tells foot to reload its configuration
+killall -SIGUSR1 foot 2>/dev/null || true
 
 # 5. Reload Hyprland
 # Sending a SIGUSR1 to hyprland often forces a reload of sourced files

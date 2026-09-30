@@ -96,7 +96,7 @@ Useful flags: `--user NAME` (non-`rajan` user), `--keep-hardware`,
 ```bash
 sudo reboot
 # pick Hyprland in tuigreet, log in, open a terminal ($MOD+Return):
-ACTIVE_THEME=Noro ~/.config/hypr/theme-chain.sh
+pick a wallpaper:  <Super>+Ctrl+Space  (or Super+R for random)
 ```
 
 You should now have wallpaper + themed bar. Reboot once more if anything
@@ -128,5 +128,5 @@ sudo ln -s "$HOME/nixos-config" /etc/nixos
 sudo nixos-generate-config --show-hardware-config > ~/nixos-config/hosts/laptop/hardware-configuration.nix
 # low RAM? add swap first, then append: --max-jobs 2 --cores 2
 sudo nixos-rebuild switch --flake ~/nixos-config#laptop
-ACTIVE_THEME=Noro ~/.config/hypr/theme-chain.sh
+pick a wallpaper:  <Super>+Ctrl+Space  (or Super+R for random)
 ```

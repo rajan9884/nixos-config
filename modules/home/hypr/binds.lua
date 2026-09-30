@@ -9,7 +9,7 @@ local scripts = vars.scripts
 
 -- Default programs
 -- New terminal inherits the focused window's working directory; falls back
--- to vars.terminal (kitty) in $HOME when no focused cwd can be resolved.
+-- to vars.terminal (foot) in $HOME when no focused cwd can be resolved.
 hl.bind(mod .. " + Return", hl.dsp.exec_cmd(scripts .. "/terminal-launch.sh"))
 hl.bind(mod .. " + Space", hl.dsp.exec_cmd(vars.menu))
 hl.bind(mod .. " + SHIFT + B", hl.dsp.exec_cmd(vars.browser))
@@ -21,7 +21,7 @@ hl.bind(mod .. " + ALT + K", hl.dsp.exec_cmd(vars.HOME .. "/.local/bin/menu-tmux
 hl.bind(mod .. " + SHIFT + ALT + M", hl.dsp.exec_cmd("cliamp"), { description = "Music player (cliamp)" })
 hl.bind(mod .. " + SHIFT + D", hl.dsp.exec_cmd("lazydocker"), { description = "Docker (lazydocker)" })
 hl.bind(mod .. " + SHIFT + O", hl.dsp.exec_cmd("obsidian"), { description = "Open Obsidian" })
-hl.bind(mod .. " + CTRL + T", hl.dsp.exec_cmd("kitty -e btop"), { description = "System monitor (btop)" })
+hl.bind(mod .. " + CTRL + T", hl.dsp.exec_cmd("foot -e btop"), { description = "System monitor (btop)" })
 
 hl.bind(mod .. " + W", hl.dsp.window.close()) -- was killactive (graceful close)
 hl.bind("SUPER + CTRL + L", hl.dsp.exec_cmd("hyprlock"))
@@ -38,13 +38,8 @@ hl.bind(mod .. " + CTRL + SHIFT + Return", hl.dsp.window.move({ workspace = "spe
 hl.bind(mod .. " + J", hl.dsp.layout("togglesplit"), { description = "Toggle window split" }) -- togglesplit (layoutmsg)
 hl.bind(mod .. " + SHIFT + F", hl.dsp.exec_cmd(vars.file))
 hl.bind(mod .. " + SHIFT + ALT + F", hl.dsp.exec_cmd(vars.HOME .. "/.local/bin/nautilus-cwd"), { description = "File manager (cwd)" })
-hl.bind(mod .. " + CTRL + Space", hl.dsp.exec_cmd(vars.HOME .. "/.local/bin/nixos-wallpaper-picker"))
-hl.bind(mod .. " + R", hl.dsp.exec_cmd(scripts .. "/random-wall.sh"))
-
-hl.bind(
-	mod .. " + CTRL + SHIFT + Space",
-	hl.dsp.exec_cmd(vars.HOME .. "/.local/bin/nixos-theme-switcher")
-)
+hl.bind(mod .. " + CTRL + Space", hl.dsp.exec_cmd(vars.HOME .. "/.local/bin/nixos-wallpaper-picker"), { description = "Wallpaper picker" })
+hl.bind(mod .. " + R", hl.dsp.exec_cmd(scripts .. "/random-wall.sh"), { description = "Random wallpaper" })
 
 hl.bind(mod .. " + ALT + F", hl.dsp.window.fullscreen({ mode = "maximized" }))
 hl.bind("ALT + Tab", hl.dsp.window.cycle_next())
@@ -91,11 +86,10 @@ hl.bind(mod .. " + SLASH", hl.dsp.exec_cmd(scripts .. "/monitor-scaling.sh up"),
 hl.bind(mod .. " + ALT + SLASH", hl.dsp.exec_cmd(scripts .. "/monitor-scaling.sh down"), { description = "Monitor scaling down" })
 hl.bind("CTRL + ALT + DELETE", hl.dsp.exec_cmd(vars.HOME .. "/.local/bin/window-close-all"), { locked = true, description = "Close all windows" })
 
-hl.bind(mod .. " + CTRL + W", hl.dsp.exec_cmd("kitty -e nmtui"), { description = "Network connections" })
+hl.bind(mod .. " + CTRL + W", hl.dsp.exec_cmd("foot -e nmtui"), { description = "Network connections" })
 hl.bind(mod .. " + ESCAPE", hl.dsp.exec_cmd("~/.config/waybar/scripts/power-menu.sh"))
 hl.bind(mod .. " + CTRL + P", hl.dsp.exec_cmd("~/.config/waybar/scripts/power-menu.sh"), { description = "Power / logout menu" })
 hl.bind(mod .. " + CTRL + B", hl.dsp.exec_cmd("~/.config/waybar/scripts/bluetooth-menu.sh"), { description = "Bluetooth menu" })
-hl.bind(mod .. " + ALT + C", hl.dsp.exec_cmd(vars.HOME .. "/.config/waybar/scripts/control-center.sh"), { description = "Control center" })
 hl.bind(mod .. " + CTRL + N", hl.dsp.exec_cmd(vars.HOME .. "/.local/bin/night-light-toggle"), { description = "Toggle nightlight" })
 hl.bind(mod .. " + CTRL + I", hl.dsp.exec_cmd(scripts .. "/idle-toggle.sh"), { description = "Toggle idle lock" })
 hl.bind(mod .. " + CTRL + E", hl.dsp.exec_cmd(vars.HOME .. "/.local/bin/menu-emoji"), { description = "Emojis" })
@@ -131,7 +125,7 @@ if voxtype_ok then
 	end)
 end
 
-hl.bind(mod .. " + ALT + W", hl.dsp.exec_cmd("~/.config/hypr/scripts/waybar-selector.sh"))
+hl.bind(mod .. " + ALT + W", hl.dsp.exec_cmd("~/.config/hypr/scripts/waybar-selector.sh"), { description = "Waybar style selector" })
 hl.bind(mod .. " + ALT + SHIFT + W", hl.dsp.exec_cmd(vars.HOME .. "/.local/bin/webapp-install-prompt"), { description = "Install web app (paste link)" })
 hl.bind(mod .. " + ALT + SHIFT + X", hl.dsp.exec_cmd(vars.HOME .. "/.local/bin/webapp-remove-prompt"), { description = "Remove web app" })
 hl.bind(mod .. " + ALT + Q", hl.dsp.exec_cmd(vars.HOME .. "/.local/bin/wifi-share-prompt"), { description = "Share WiFi via QR" })
@@ -197,7 +191,7 @@ hl.bind(
 	{ locked = true, description = "Notification history" }
 )
 
--- Emoji picker & keybindings cheat sheet (rofi themes pull matugen colors)
+-- Emoji picker & keybindings cheat sheet (rofi pulls matugen colors)
 hl.bind(mod .. " + period", hl.dsp.exec_cmd(vars.HOME .. "/.local/bin/menu-emoji"))
 hl.bind(mod .. " + K", hl.dsp.exec_cmd(scripts .. "/keybinds-cheatsheet.sh"), { description = "Keybindings cheatsheet" })
 hl.bind(mod .. " + slash", hl.dsp.exec_cmd(scripts .. "/keybinds-cheatsheet.sh"), { description = "Keybindings cheatsheet" })
@@ -308,7 +302,7 @@ local function send_shortcut_once(mods, key)
 end
 
 local terminal_classes = {
-	"kitty", "alacritty", "foot", "wezterm", "ghostty", "rio", "ptyxis",
+	"foot", "alacritty", "wezterm", "ghostty", "rio", "ptyxis",
 	"konsole", "xfce4-terminal", "gnome-terminal", "gnome-console",
 	"urxvt", "urxvtc", "xterm", "st",
 }
@@ -364,5 +358,5 @@ hl.bind(mod .. " + CTRL + BACKSPACE", function()
 	end
 end, { description = "Toggle single-window square aspect" })
 
--- NOTE: SUPER+CTRL+SHIFT+Space is already owned by nixos-theme-switcher above
--- (same combo, mods are order-insensitive) — do NOT add a theme-menu bind here.
+-- Wallpaper-driven setup: colors regenerate from the active wallpaper
+-- (SUPER+CTRL+Space picker, SUPER+R random) via swww-all.sh + matugen.

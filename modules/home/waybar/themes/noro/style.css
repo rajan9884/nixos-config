@@ -23,7 +23,7 @@ window#waybar {
 /* ── Grouping Strategy ── */
 #clock, #custom-user,
 #workspaces, #custom-launcher,
-#tray, #battery, #bluetooth, #custom-power {
+#battery, #bluetooth, #custom-power {
     background: @surface; /* DYNAMIC: Based on wallpaper */
     color: @on_surface;    /* DYNAMIC: Based on wallpaper */
     padding: 4px 12px;
@@ -77,6 +77,31 @@ window#waybar {
     padding: 4px 8px;
     margin: 6px 0;
 }
+#custom-wifi {
+    background: @surface;
+    color: @on_surface;
+    padding: 4px 0;
+    padding-left: 4px;
+    padding-right: 12px;
+    margin: 6px 0;
+}
+#custom-wifi.wifi-on {
+    color: @primary;
+}
+#custom-wifi.wifi-wired {
+    color: @tertiary;
+}
+#custom-wifi.wifi-tether {
+    color: @on_surface_variant;
+}
+#custom-wifi.wifi-hotspot {
+    color: @tertiary;
+}
+#custom-wifi.wifi-off,
+#custom-wifi.wifi-disconnected {
+    color: @on_surface_variant;
+    opacity: 0.6;
+}
 /* --- Center Group [Workspaces | Bright | Vol] --- */
 #workspaces {
     border-radius: 12px 0 0 12px;
@@ -123,8 +148,10 @@ window#waybar {
     padding-left: 15px;
 }
 #tray {
-    padding-left: 8px;
-    padding-right: 6px;
+    background: transparent;
+    color: @on_surface;
+    padding: 4px 8px;
+    margin: 6px 0 6px 30px;
 }
 #bluetooth {
     background: @primary; /* DYNAMIC */
@@ -145,13 +172,33 @@ window#waybar {
 /* --- Hover & Active --- */
 #workspaces button {
     color: @on_surface_variant;
-    padding: 0 4px;
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    outline: none;
+    opacity: 0.35;
+    padding: 0 6px;
+    border-radius: 8px;
+}
+#workspaces button:not(.empty):not(.active) {
+    color: @primary;
+    opacity: 1;
 }
 #workspaces button.active {
     color: @primary;
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    outline: none;
+    opacity: 1;
+}
+#workspaces button.urgent {
+    color: @error;
+    opacity: 1;
 }
 #workspaces button:hover {
-    color: @secondary;
+    color: @primary;
+    opacity: 1;
 }
 
 #battery.charging {
@@ -169,11 +216,7 @@ window#waybar {
     background: @surface_variant;
     border-color: @outline;
 }
-/* ── System Tray (middle segment of the right pill) ─── */
-#tray {
-    color: @on_surface;
-}
-
+/* ── System Tray ─── */
 #tray > .passive {
     opacity: 0.7;
 }

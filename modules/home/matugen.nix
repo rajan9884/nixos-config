@@ -8,18 +8,18 @@
     if [ -L "$HOME/.config/matugen" ]; then rm "$HOME/.config/matugen"; fi
     mkdir -p "$HOME/.config/matugen"
     ${pkgs.rsync}/bin/rsync -a --chmod=u+w "${./matugen}/" "$HOME/.config/matugen/"
-    mkdir -p "$HOME/.config/fastfetch" "$HOME/.config/helium-theme" "$HOME/.config/ghostty"
+    mkdir -p "$HOME/.config/fastfetch" "$HOME/.config/helium-theme" "$HOME/.config/ghostty" "$HOME/.config/foot"
   '';
 
   # Regenerate every matugen palette when any key output is missing — a
   # single `matugen image` run rewrites them all at once. The per-app syncs
   # above deliberately EXCLUDE these files (syncing repo copies would
   # restore stale palettes on every boot/rebuild), so without this step a
-  # fresh install would leave kitty/rofi/hyprlock/etc. unthemed until the
+  # fresh install would leave foot/rofi/hyprlock/etc. unthemed until the
   # first manual wallpaper switch.
   home.activation.seedMatugenColors = lib.hm.dag.entryAfter [ "writeBoundary" "syncMatugen" "syncWallpapers" ] ''
     if [ ! -s "$HOME/.config/waybar/colors.css" ] || \
-       [ ! -s "$HOME/.config/kitty/colors.conf" ] || \
+       [ ! -s "$HOME/.config/foot/colors.ini" ] || \
        [ ! -s "$HOME/.config/rofi/colors.rasi" ] || \
        [ ! -s "$HOME/.config/hypr/colors.conf" ] || \
        [ ! -s "$HOME/.config/hypr/colors.lua" ] || \
@@ -28,15 +28,16 @@
        [ ! -s "$HOME/.config/gtk-4.0/gtk.css" ] || \
        [ ! -s "$HOME/.config/swaync/style.css" ] || \
        [ ! -s "$HOME/.config/zed/themes/matugen.json" ] || \
+       [ ! -s "$HOME/.config/starship.toml" ] || \
        [ ! -s "$HOME/.config/btop/themes/matugen.theme" ]; then
-      mkdir -p "$HOME/.config/waybar" "$HOME/.config/kitty" "$HOME/.config/rofi" \
+      mkdir -p "$HOME/.config/waybar" "$HOME/.config/foot" "$HOME/.config/rofi" \
         "$HOME/.config/hypr" "$HOME/.config/gtk-3.0" "$HOME/.config/gtk-4.0" \
         "$HOME/.config/swaync" "$HOME/.config/zed/themes" "$HOME/.config/btop/themes"
       WALL=""
       if [ -f "$HOME/.cache/current-wallpaper" ]; then
         WALL="$(cat "$HOME/.cache/current-wallpaper" || true)"
       fi
-      # Flat store: ~/.local/share/wallpapers/*.jpg (no noro/ subdir).
+      # Flat store: ~/.local/share/wallpapers/*.jpg (no subdirs).
       if [ -z "$WALL" ] || [ ! -f "$WALL" ]; then
         for cand in "$HOME/.local/share/wallpapers/nord-wallpaper.jpg" \
                      "$HOME/.local/share/wallpapers/fallback-wallpaper.jpg"; do

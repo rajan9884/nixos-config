@@ -196,7 +196,7 @@ fi
 cat <<EOF
 ==> done.
 Next (once, after first login via tuigreet):
-  ACTIVE_THEME=Noro ~/.config/hypr/theme-chain.sh
+  reboot, log in, pick a wallpaper:  <Super>+Ctrl+Space  (or Super+R for random)
   reboot, log in, pick a wallpaper:  <Super>+W  (or: wallpapers-sync after git pull)
 Daily:  nrs (switch) · nrb (build) · nrc (stage + flake check)
 EOF
