@@ -19,9 +19,9 @@
     # regenerates it. Likewise, syncing the theme links would pin the bar
     # back to the default theme on every boot, clobbering the user's pick.
     ${pkgs.rsync}/bin/rsync -a --chmod=u+w \
-      --exclude='colors.css' \
-      --exclude='config.jsonc' \
-      --exclude='style.css' \
+      --exclude='/colors.css' \
+      --exclude='/config.jsonc' \
+      --exclude='/style.css' \
       "${./waybar}/" "$HOME/.config/waybar/"
 
     # Seed the default (Noro) theme links on fresh installs only — the
