@@ -26,4 +26,14 @@ PATH="$new_path"
 unset _parts _p new_path self_dir
 real_bin="$(command -v chromium)" || { echo "chromium: real binary not found in PATH" >&2; exit 127; }
 [ "$real_bin" = "$0" ] && { echo "chromium: refusing to re-exec self ($0)" >&2; exit 1; }
-exec "$real_bin" --load-extension="$HOME/.config/helium-theme" "$@"
+# Flags live HERE (single source — packages.nix keeps chromium plain, since
+# duplicate --disable-features switches are last-wins and would silently
+# drop each other):
+# - ozone hint: native Wayland (NIXOS_OZONE_WL=1 set system-wide too).
+# - ExtensionDeveloperModeWarning: silence the unpacked-theme popup.
+# - Vulkan: DISABLED — '--ozone-platform=wayland is not compatible with
+#   Vulkan' (chromium picks Vulkan on Intel ANV, then the GPU process fails
+#   and pages break). Falls back to GL/EGL compositing on Wayland.
+exec "$real_bin" --ozone-platform-hint=auto \
+  --disable-features=ExtensionDeveloperModeWarning,Vulkan,VulkanFromANGLE,DefaultANGLEVulkan \
+  --load-extension="$HOME/.config/helium-theme" "$@"

@@ -140,16 +140,16 @@ in
     iw
     nvtopPackages.intel
 
-    # Browser (pure Wayland via NIXOS_OZONE_WL)
-    # --load-extension auto-loads the matugen-generated unpacked theme
-    # (~/.config/helium-theme/manifest.json) on every launch, including
-    # --app windows from webapp-launch.
-    (chromium.override {
-      commandLineArgs = [
-        "--load-extension=/home/rajan/.config/helium-theme"
-        "--disable-features=ExtensionDeveloperModeWarning"
-      ];
-    })
+    # Browser (pure Wayland via NIXOS_OZONE_WL).
+    # Kept PLAIN on purpose: every launch flag (ozone hint, matugen theme
+    # extension, ExtensionDeveloperModeWarning + Vulkan disables) lives in
+    # the ~/.local/bin/chromium wrapper — duplicate --disable-features
+    # switches are last-wins and would silently clobber each other.
+    # Covers normal launches and --app windows from webapp-launch.
+    # Intel Iris Xe note: `--ozone-platform=wayland` is NOT compatible with
+    # Vulkan (wayland_surface_factory.cc:249), hence the Vulkan disable.
+    # Stays X11-free (xwayland.enable=false).
+    chromium
 
     # Wayland / desktop integration
     libappindicator-gtk3
