@@ -224,10 +224,9 @@
     '';
 
   # ── Packages with NO nixpkgs equivalent (manual step) ──
-  # - helium-browser-bin: no nixpkgs package. Option A: Flatpak/WebApp
-  #   (`webapp-install` helper already exists). Option B: fetch the upstream
-  #   binary tarball with a custom derivation — say the word and I'll write it.
-  #   vars.lua currently defaults to chromium, so nothing breaks meanwhile.
+  # - helium-browser: evaluated, dropped — no nixpkgs package (only
+  #   community flakes repackaging upstream .debs). Browser stays chromium
+  #   (nixpkgs, pure Wayland) via the ~/.local/bin/chromium wrapper.
   # - voxtype-bin (dictation, F9): not packaged. Install via cargo.
   #   Binds degrade gracefully if missing.
   # - chatgpt-desktop, claude-desktop, cliamp-bin, cloudflare-warp-bin:
@@ -281,6 +280,12 @@
       try() {
         NIXPKGS_ALLOW_UNFREE=1 NIX_TRY_SHELL=1 nix shell --impure "$@"
       }
+      # Arrow keys = normal history; atuin TUI is Ctrl-R only
+      # (--disable-up-arrow drops its Up binding).
+      bindkey '^[[A' up-line-or-history
+      bindkey '^[OA' up-line-or-history
+      bindkey '^[[B' down-line-or-history
+      bindkey '^[OB' down-line-or-history
       fastfetch
       y() {
         local tmp="$(mktemp -t yazi-cwd.XXXXXX)"
@@ -337,8 +342,11 @@
   };
   programs.atuin = {
     enable = true;
+    # Up-arrow = normal shell history, Ctrl-R = atuin TUI only.
+    flags = [ "--disable-up-arrow" ];
     settings = { enter_accept = false; };
   };
+
   programs.direnv = {
     enable = true;
     nix-direnv.enable = true;

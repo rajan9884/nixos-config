@@ -62,9 +62,14 @@ systemctl --user restart waybar.service 2>/dev/null || {
     setsid waybar >/dev/null 2>&1 < /dev/null &
 }
 
-# 4. Reload Foot
-# SIGUSR1 tells foot to reload its configuration
-killall -SIGUSR1 foot 2>/dev/null || true
+# 4. Recolor running Foot terminals live
+# Foot has NO config-reload signal: SIGUSR1/2 only switch between the
+# already-loaded [colors-dark]/[colors-light] themes, they never re-read
+# ~/.config/foot/colors.ini from disk. matugen rewrote that file above, so
+# new terminals are correct — push the palette to running PTYs via OSC so
+# open terminals + TUIs on terminal colors (fastfetch, next prompt) update
+# with NO reopen (just re-run the command).
+"$HOME/.local/bin/foot-live-recolor" 2>/dev/null || true
 
 # 5. Reload Hyprland
 # Sending a SIGUSR1 to hyprland often forces a reload of sourced files
@@ -87,6 +92,16 @@ fi
 # signaling (a bare kill would be a no-op at best).
 if pgrep -x nvim >/dev/null 2>&1; then
     notify-send "Neovim Theme Updated" "Restart nvim to apply new colors"
+fi
+
+# 6.6 Btop
+# btop reads its theme file once at startup (no reload signal), so running
+# instances keep the previous accent colors until restarted. Its background
+# is transparent (uses the terminal bg), so the foot-live-recolor above
+# already updates that part — only the accents need a restart. Nudge like
+# nvim instead of killing a live monitor.
+if pgrep -x btop >/dev/null 2>&1; then
+    notify-send "Btop Theme Updated" "Restart btop to apply new colors"
 fi
 
 

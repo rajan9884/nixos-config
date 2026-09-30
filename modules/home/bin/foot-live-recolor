@@ -1,0 +1,56 @@
+#!/usr/bin/env bash
+# ──────────────────────────────────────────────
+#   foot-live-recolor — push matugen palette to running terminals.
+#   Foot has NO config-reload signal (SIGUSR1/2 only switch between the
+#   already-loaded [colors-dark]/[colors-light] themes, they never re-read
+#   ~/.config/foot/colors.ini from disk), so after matugen rewrites
+#   colors.ini only NEW terminals get the palette — running ones keep the
+#   old colors until restarted. This parses colors.ini and writes OSC
+#   10/11/12 + OSC 4/0-15 to every writable /dev/pts/*, recoloring all
+#   running terminals instantly. Anything using the terminal palette
+#   (fastfetch, ls, fzf, TUIs on default colors, next starship prompt)
+#   then shows new colors with NO reopen — just re-run the command.
+# ──────────────────────────────────────────────
+set -u
+
+COLORS="${FOOT_COLORS:-$HOME/.config/foot/colors.ini}"
+[ -f "$COLORS" ] || exit 0
+
+# Read a `key=value` from the ini (values are hex_stripped, no '#').
+get() {
+  grep -m1 -E "^$1=" "$COLORS" 2>/dev/null | cut -d= -f2- | tr -d '[:space:]' || true
+}
+
+fg=$(get foreground)
+bg=$(get background)
+cursor_raw=$(get cursor)
+# foot cursor= "<text> <cursor>"; OSC 12 wants the visible cursor color.
+cursor=$(printf '%s' "$cursor_raw" | awk '{print $2}'); [ -z "$cursor" ] && cursor=$(printf '%s' "$cursor_raw" | awk '{print $1}')
+sel_fg=$(get selection-foreground)
+sel_bg=$(get selection-background)
+
+pal=""
+i=0
+while [ "$i" -lt 8 ]; do
+  v=$(get "regular$i"); [ -n "$v" ] && pal="${pal}$(printf '\033]4;%d;#%s\033\\' "$i" "$v")"
+  i=$((i + 1))
+done
+i=0
+while [ "$i" -lt 8 ]; do
+  v=$(get "bright$i"); [ -n "$v" ] && pal="${pal}$(printf '\033]4;%d;#%s\033\\' "$((i + 8))" "$v")"
+  i=$((i + 1))
+done
+
+seq=""
+[ -n "$fg" ] && seq="${seq}$(printf '\033]10;#%s\033\\' "$fg")"
+[ -n "$bg" ] && seq="${seq}$(printf '\033]11;#%s\033\\' "$bg")"
+[ -n "$cursor" ] && seq="${seq}$(printf '\033]12;#%s\033\\' "$cursor")"
+[ -n "$sel_bg" ] && seq="${seq}$(printf '\033]17;#%s\033\\' "$sel_bg")"
+[ -n "$sel_fg" ] && seq="${seq}$(printf '\033]19;#%s\033\\' "$sel_fg")"
+seq="${seq}${pal}"
+[ -z "$seq" ] && exit 0
+
+for tty in /dev/pts/*; do
+  [ -w "$tty" ] || continue
+  printf '%b' "$seq" > "$tty" 2>/dev/null || true
+done

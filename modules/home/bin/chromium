@@ -5,4 +5,25 @@
 # change. Chromium only applies an unpacked theme while it's loaded, and
 # --load-extension is ephemeral (dropped on relaunch), so we inject it on
 # every launch to keep the browser following the current palette.
-exec chromium --load-extension="$HOME/.config/helium-theme" "$@"
+#
+# NOTE: this wrapper is itself named `chromium` and lives in ~/.local/bin,
+# which is early in PATH — a bare `exec chromium` would re-exec THIS file
+# forever (confirmed: hung, had to be timeout-killed). Strip our own
+# directory from PATH first so we reach the real chromium binary.
+self_dir="$(dirname "$0")"
+case "$self_dir" in
+  "~"*) self_dir="$HOME${self_dir#"~"}" ;;
+  [^/]*) self_dir="$PWD/$self_dir" ;;
+esac
+new_path=""
+IFS=: read -ra _parts <<< "$PATH"
+for _p in "${_parts[@]}"; do
+  [ "$_p" = "$self_dir" ] && continue
+  [ "$_p" = "$HOME/.local/bin" ] && continue
+  new_path="${new_path:+$new_path:}$_p"
+done
+PATH="$new_path"
+unset _parts _p new_path self_dir
+real_bin="$(command -v chromium)" || { echo "chromium: real binary not found in PATH" >&2; exit 127; }
+[ "$real_bin" = "$0" ] && { echo "chromium: refusing to re-exec self ($0)" >&2; exit 1; }
+exec "$real_bin" --load-extension="$HOME/.config/helium-theme" "$@"

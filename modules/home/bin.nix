@@ -8,6 +8,7 @@ let
     "capture-satty"
     "capture-screen"
     "chromium"
+    "foot-live-recolor"
     "lazyvim"
     "menu-clipboard"
     "menu-emoji"
