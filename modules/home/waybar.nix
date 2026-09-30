@@ -18,7 +18,7 @@
     # palette replaces the live one until the next wallpaper switch
     # regenerates it. Likewise, syncing the theme links would pin the bar
     # back to the default theme on every boot, clobbering the user's pick.
-    ${pkgs.rsync}/bin/rsync -a --chmod=u+w \
+    ${pkgs.rsync}/bin/rsync -a --checksum --chmod=u+w \
       --exclude='/colors.css' \
       --exclude='/config.jsonc' \
       --exclude='/style.css' \

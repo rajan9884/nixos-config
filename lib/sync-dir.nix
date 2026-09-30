@@ -19,10 +19,15 @@
 # wallpaper switch regenerates it. Patterns without a `/` match the
 # basename at any depth; prefix with `/` to anchor to the top level
 # (e.g. `/style.css` for swaync without touching deeper style files).
+#
+# --checksum: rsync's default size+mtime heuristic silently SKIPS edits that
+# preserve byte length (e.g. one nerd-font glyph swapped for another, or
+# `kitty --class` → `foot --app-id`), because store files all share epoch
+# mtimes. Checksums make every rebuild converge live files to repo content.
 { pkgs, lib }:
 src: dest: excludes:
 lib.hm.dag.entryAfter [ "writeBoundary" ] ''
   if [ -L "${dest}" ]; then rm "${dest}"; fi
   mkdir -p "${dest}"
-  ${pkgs.rsync}/bin/rsync -a --chmod=u+w${lib.concatMapStrings (e: " --exclude='${e}'") excludes} "${src}/" "${dest}/"
+  ${pkgs.rsync}/bin/rsync -a --checksum --chmod=u+w${lib.concatMapStrings (e: " --exclude='${e}'") excludes} "${src}/" "${dest}/"
 ''
