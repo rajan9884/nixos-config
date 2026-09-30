@@ -5,6 +5,6 @@ let syncDir = import ../../lib/sync-dir.nix { inherit pkgs lib; };
 in
 {
   home.activation.syncKitty = syncDir ./kitty "$HOME/.config/kitty" [
-    "colors.conf"
+    "/colors.conf"
   ];
 }

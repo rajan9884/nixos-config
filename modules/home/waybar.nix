@@ -6,7 +6,9 @@
 {
   # Runs after syncMatugen so matugen's config is in place before the
   # colors.css safety net below potentially invokes matugen.
-  home.activation.syncWaybar = lib.hm.dag.entryAfter [ "writeBoundary" "syncMatugen" ] ''
+  # Also after syncWallpapers so the flat wallpaper store exists — otherwise
+  # the `find` below (pipefail + set -e) aborts the whole HM activation.
+  home.activation.syncWaybar = lib.hm.dag.entryAfter [ "writeBoundary" "syncMatugen" "syncWallpapers" ] ''
     if [ -L "$HOME/.config/waybar" ]; then rm "$HOME/.config/waybar"; fi
     mkdir -p "$HOME/.config/waybar"
     # NOTE: colors.css (matugen output), config.jsonc + style.css (theme
@@ -40,7 +42,7 @@
       if [ ! -f "$HOME/.config/waybar/colors.css" ]; then
         WALL=""
         if [ -f "$HOME/.cache/current-wallpaper" ]; then
-          WALL="$(cat "$HOME/.cache/current-wallpaper")"
+          WALL="$(cat "$HOME/.cache/current-wallpaper" || true)"
         fi
         # Flat store: ~/.local/share/wallpapers/*.jpg (no noro/ subdir).
         if [ -z "$WALL" ] || [ ! -f "$WALL" ]; then
@@ -51,7 +53,7 @@
         fi
         if [ -z "$WALL" ] || [ ! -f "$WALL" ]; then
           WALL="$(find "$HOME/.local/share/wallpapers" -maxdepth 1 -type f \
-            \( -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.png' -o -iname '*.webp' \) 2>/dev/null | sort | head -n1)"
+            \( -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.png' -o -iname '*.webp' \) 2>/dev/null | sort | head -n1 || true)"
         fi
       if [ -n "$WALL" ] && [ -f "$WALL" ]; then
         ${pkgs.matugen}/bin/matugen image "$WALL" --type scheme-content -c "$HOME/.config/matugen/config.toml" --source-color-index 0 || true

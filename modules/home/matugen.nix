@@ -17,7 +17,7 @@
   # restore stale palettes on every boot/rebuild), so without this step a
   # fresh install would leave kitty/rofi/hyprlock/etc. unthemed until the
   # first manual wallpaper switch.
-  home.activation.seedMatugenColors = lib.hm.dag.entryAfter [ "writeBoundary" "syncMatugen" ] ''
+  home.activation.seedMatugenColors = lib.hm.dag.entryAfter [ "writeBoundary" "syncMatugen" "syncWallpapers" ] ''
     if [ ! -s "$HOME/.config/waybar/colors.css" ] || \
        [ ! -s "$HOME/.config/kitty/colors.conf" ] || \
        [ ! -s "$HOME/.config/rofi/colors.rasi" ] || \
@@ -34,7 +34,7 @@
         "$HOME/.config/swaync" "$HOME/.config/zed/themes" "$HOME/.config/btop/themes"
       WALL=""
       if [ -f "$HOME/.cache/current-wallpaper" ]; then
-        WALL="$(cat "$HOME/.cache/current-wallpaper")"
+        WALL="$(cat "$HOME/.cache/current-wallpaper" || true)"
       fi
       # Flat store: ~/.local/share/wallpapers/*.jpg (no noro/ subdir).
       if [ -z "$WALL" ] || [ ! -f "$WALL" ]; then
@@ -43,9 +43,12 @@
           if [ -f "$cand" ]; then WALL="$cand"; break; fi
         done
       fi
+      # NOTE: `|| true` — HM activation runs with `set -e -o pipefail`, so
+      # `find` on a missing ~/.local/share/wallpapers would otherwise abort
+      # the whole activation (no GUI) before syncWallpapers ever runs.
       if [ -z "$WALL" ] || [ ! -f "$WALL" ]; then
         WALL="$(find "$HOME/.local/share/wallpapers" -maxdepth 1 -type f \
-          \( -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.png' -o -iname '*.webp' \) 2>/dev/null | sort | head -n1)"
+          \( -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.png' -o -iname '*.webp' \) 2>/dev/null | sort | head -n1 || true)"
       fi
       if [ -n "$WALL" ] && [ -f "$WALL" ]; then
         ${pkgs.matugen}/bin/matugen image "$WALL" --type scheme-content -c "$HOME/.config/matugen/config.toml" --source-color-index 0 || true

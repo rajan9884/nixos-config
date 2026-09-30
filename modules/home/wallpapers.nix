@@ -64,5 +64,12 @@
       # never fail on a machine where ~/wallpapers hasn't been cloned yet.
       ${pkgs.coreutils}/bin/cp -f "${../../assets/fallback-wallpaper.jpg}" "$DEST/fallback-wallpaper.jpg"
     fi
+    # Guarantee DEST is never empty (e.g. ~/wallpapers exists but has no
+    # images yet): seed the offline fallback so matugen/waybar seeds below
+    # always have a WALL to work with and the GUI comes back styled.
+    if ! ${pkgs.findutils}/bin/find "$DEST" -maxdepth 1 -type f \
+      \( -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.png' -o -iname '*.webp' \) -print -quit 2>/dev/null | ${pkgs.gnugrep}/bin/grep -q .; then
+      ${pkgs.coreutils}/bin/cp -f "${../../assets/fallback-wallpaper.jpg}" "$DEST/fallback-wallpaper.jpg" || true
+    fi
   '';
 }

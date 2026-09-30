@@ -170,7 +170,7 @@
         # first sorted image in the flat dir.
         WALL=""
         if [ -f "$HOME/.cache/current-wallpaper" ]; then
-          WALL="$(cat "$HOME/.cache/current-wallpaper")"
+          WALL="$(cat "$HOME/.cache/current-wallpaper" || true)"
         fi
         if [ -z "$WALL" ] || [ ! -f "$WALL" ]; then
           for cand in "$HOME/.local/share/wallpapers/nord-wallpaper.jpg" \
@@ -180,7 +180,7 @@
         fi
         if [ -z "$WALL" ] || [ ! -f "$WALL" ]; then
           WALL="$(find "$HOME/.local/share/wallpapers" -maxdepth 1 -type f \
-            \( -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.png' -o -iname '*.webp' \) 2>/dev/null | sort | head -n1)"
+            \( -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.png' -o -iname '*.webp' \) 2>/dev/null | sort | head -n1 || true)"
         fi
         # awww-daemon is started by Hyprland exec-once; wait for its socket.
         for _i in $(seq 1 60); do
