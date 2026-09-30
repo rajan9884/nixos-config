@@ -157,7 +157,13 @@ in
 
     # AI CLIs: available in EVERY shell + GUI session via nix profile
     opencode
-    kilo
+    # kilo REMOVED 2026-09-30: kilo-7.3.40 is broken in nixpkgs-unstable
+    # (vite console build dies with exit 126, `/usr/bin/env: bad
+    # interpreter` in the sandbox) and one failed package fails the ENTIRE
+    # home-manager user env -> whole system build. Re-add after GUI is up:
+    #   1. test:  nix shell nixpkgs#kilo --command kilo --version
+    #   2. if green, uncomment below and `nrs`.
+    # kilo
     nodejs
     bun
     mise

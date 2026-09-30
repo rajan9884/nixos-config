@@ -173,7 +173,7 @@
     persistent = true;
   };
 
-  # Kept at install version on purpose — do NOT bump on every reinstall.
+  # Install version (minimal ISO 26.05) — do NOT bump on every reinstall.
   # See: https://nixos.org/manual/release-notes.html#sec-upgrading
-  system.stateVersion = "25.11";
+  system.stateVersion = "26.05";
 }

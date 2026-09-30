@@ -129,7 +129,7 @@ gh auth login && gh auth setup-git   # token -> ~/.config/gh/hosts.yml (credenti
   delete it and rebuild to resync from repo.
 * `wallpapers` never live here — they live in `~/wallpapers`
   (flat-synced; `~/wallpapers/install.sh --flat` same contract on other distros).
-* `system.stateVersion` / `home.stateVersion` stay at install version (25.11).
+* `system.stateVersion` / `home.stateVersion` stay at install version (26.05).
   Do not bump on reinstall.
 * GC: `--delete-older-than 30d` + `configurationLimit 10` + docker `autoPrune`
   weekly. `system.autoUpgrade` pulls nixpkgs weekly (system only).

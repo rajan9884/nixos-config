@@ -28,8 +28,8 @@
 
   home.username = "rajan";
   home.homeDirectory = "/home/rajan";
-  # Kept at install version on purpose — see hosts/laptop/configuration.nix.
-  home.stateVersion = "25.11";
+  # Install version (minimal ISO 26.05) — see hosts/laptop/configuration.nix.
+  home.stateVersion = "26.05";
   programs.home-manager.enable = true;
 
   # Active-theme symlink chain (default Noro).

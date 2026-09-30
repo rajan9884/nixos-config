@@ -1,7 +1,7 @@
 # INSTALL — minimal ISO → this desktop
 
 You do partitioning/formatting/mounting yourself. Everything after that is
-here. Tested path: official minimal NixOS ISO (64-bit Intel/AMD, 25.11+).
+here. Tested path: official minimal NixOS ISO (64-bit Intel/AMD, 26.05).
 
 Starting state assumed below: partitions formatted, root mounted at `/mnt`,
 EFI partition mounted at `/mnt/boot`. Verify before continuing:
@@ -46,7 +46,7 @@ sudo nixos-generate-config --root /mnt
 
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
   environment.systemPackages = with pkgs; [ git neovim wget curl ];
-  system.stateVersion = "25.11";
+  system.stateVersion = "26.05";   # match the ISO you installed from
 }
 ```
 
